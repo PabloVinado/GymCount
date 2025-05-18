@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App de Gimnasio</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f5f7fa;
+      --text-color: #2d3748;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --shadow-color: rgba(0,0,0,0.1);
+      --chart-bg: #ffffff;
+      --primary-color: #4299e1;
+      --success-color: #48bb78;
+      --danger-color: #f56565;
+      --accent-color: #805ad5;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1a202c;
+      --text-color: #e2e8f0;
+      --card-bg: #2d3748;
+      --border-color: #4a5568;
+      --shadow-color: rgba(0,0,0,0.3);
+      --chart-bg: #2d3748;
+      --primary-color: #63b3ed;
+      --success-color: #68d391;
+      --danger-color: #fc8181;
+      --accent-color: #b794f4;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      padding: 1.5em;
+      max-width: 600px;
+      margin: auto;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+      line-height: 1.5;
+    }
+
+    h2, h3 {
+      font-weight: 600;
+      margin-bottom: 1em;
+      color: var(--text-color);
+    }
+
+    input, select, button {
+      display: block;
+      margin: 0.75em 0;
+      width: 100%;
+      padding: 0.75em;
+      font-size: 1em;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, button:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1em;
+      right: 1em;
+      width: auto;
+      padding: 0.5em 1em;
+      border-radius: 20px;
+      font-size: 0.9em;
+      z-index: 1000;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .ejercicio-container {
+      margin-bottom: 1.5em;
+      background: var(--card-bg);
+      padding: 1.5em;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .ejercicios-guardados {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75em;
+      margin-top: 1.5em;
+    }
+
+    .ejercicio-btn {
+      text-align: left;
+      padding: 1em;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+
+    .ejercicio-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .registro {
+      background: var(--card-bg);
+      padding: 1em;
+      margin-top: 0.75em;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px var(--shadow-color);
+      transition: transform 0.2s;
+    }
+
+    .registro:hover {
+      transform: translateY(-2px);
+    }
+
+    .registro-contenido {
+      flex-grow: 1;
+    }
+
+    .registro small {
+      color: var(--text-color);
+      opacity: 0.7;
+      font-size: 0.85em;
+    }
+
+    .borrar-registro {
+      background: none;
+      border: none;
+      color: var(--danger-color);
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 0.2em;
+      opacity: 0.7;
+      transition: all 0.2s;
+      width: auto;
+    }
+
+    .borrar-registro:hover {
+      opacity: 1;
+      background: none;
+      transform: scale(1.1);
+    }
+
+    .volver {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      margin-bottom: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      width: auto;
+      padding: 0.5em 1em;
+    }
+
+    .header-ejercicio, .header-historial {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+      padding: 1em;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .borrar-ejercicio, .borrar-historial {
+      background: none;
+      border: none;
+      color: var(--danger-color);
+      cursor: pointer;
+      font-size: 1.5em;
+      padding: 0.2em;
+      width: auto;
+      transition: all 0.2s;
+    }
+
+#peso-maximo, #reps-maximas, #total-series {
+  font-size: 2em;
+}
+
+#ejercicio-actual {
+  margin-bottom: 0;
+  font-size: 1.5em;
+}
+
+
+
+
+    .borrar-ejercicio:hover, .borrar-historial:hover {
+      transform: scale(1.1);
+      background: none;
+    }
+
+    .ultimos-registros {
+      margin-top: 2em;
+      padding: 1.5em;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .registro-reciente {
+      background: var(--card-bg);
+      padding: 1em;
+      margin-bottom: 0.75em;
+      border-radius: 8px;
+      font-size: 0.95em;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s;
+    }
+
+    .registro-reciente:hover {
+      transform: translateY(-2px);
+    }
+
+    .grafico-container {
+      margin: 2em 0;
+      padding: 1.5em;
+      background: var(--chart-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .peso-corporal-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75em;
+      margin: 1em 0;
+      padding: 1em;
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .peso-corporal-container input[type="checkbox"] {
+      width: 1.2em;
+      height: 1.2em;
+      margin: 0;
+    }
+
+    .fecha-container {
+      margin: 1.5em 0;
+      padding: 1em;
+      background: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .fecha-container label {
+      display: block;
+      margin-bottom: 0.75em;
+      color: var(--text-color);
+      font-size: 0.95em;
+      font-weight: 500;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1em;
+      margin: 1.5em 0;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 1em;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .stat-value {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin: 0.2em 0;
+    }
+
+    .stat-label {
+      font-size: 1em;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25em 0.5em;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: 500;
+      margin-left: 0.5em;
+    }
+
+    .badge-success {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .badge-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1em;
+      }
+
+      .ejercicios-guardados {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stats-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      text-align: center;
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px var(--shadow-color);
+      
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .pantalla {
+      display: none;
+    }
+
+    .pantalla.activa {
+      display: block;
+    }
+
+    /* Ocultar flechas de campos numéricos */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .grafico-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+
+    .toggle-agrupacion {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 0.5em 1em;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.2s;
+    }
+
+    .toggle-agrupacion:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .toggle-agrupacion.activo {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .vista-selector {
+      display: flex;
+      gap: 0;
+      margin: 1.5em 0;
+      background: var(--card-bg);
+      padding: 0.5em;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .vista-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      padding: 0.75em;
+      margin: 0;
+      font-size: 0.9em;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .vista-btn:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .vista-btn:last-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .vista-btn.activo {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .vista-btn:not(.activo):hover {
+      background: var(--border-color);
+    }
+
+    .tipo-ejercicio-selector {
+      display: flex;
+      gap: 0;
+      margin: 1em 0;
+      background: var(--card-bg);
+      padding: 0.5em;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tipo-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      padding: 0.75em;
+      margin: 0;
+      font-size: 0.9em;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5em;
+    }
+
+    .tipo-btn .icono {
+      font-size: 1.2em;
+    }
+
+    .tipo-btn:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .tipo-btn:last-child {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .tipo-btn.activo {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .tipo-btn:not(.activo):hover {
+      background: var(--border-color);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌓 Cambiar tema</button>
+
+  <div id="pantalla-seleccion" class="pantalla activa">
+    <h2>Selección de Ejercicio</h2>
+    
+    <div class="ejercicio-container">
+      <input type="text" id="ejercicio" placeholder="Nuevo ejercicio" />
+      <div class="tipo-ejercicio-selector">
+        <button class="tipo-btn activo" data-tipo="repeticiones" onclick="cambiarTipoEjercicio('repeticiones')">
+          <span class="icono">🔄</span>
+          Repeticiones
+        </button>
+        <button class="tipo-btn" data-tipo="tiempo" onclick="cambiarTipoEjercicio('tiempo')">
+          <span class="icono">⏱️</span>
+          Tiempo
+        </button>
+      </div>
+      <button onclick="continuarARegistro()">Continuar</button>
+    </div>
+
+    <div class="ejercicios-guardados">
+      <!-- Ejercicios guardados se cargarán dinámicamente -->
+    </div>
+
+    <div class="ultimos-registros">
+      <h3>Últimos registros</h3>
+      <div id="registros-recientes"></div>
+    </div>
+  </div>
+
+  <div id="pantalla-registro" class="pantalla">
+    <button class="volver" onclick="volverASeleccion()">← Volver</button>
+    
+    <div class="header-ejercicio">
+      <h3 class="ejercicio-titulo" id="ejercicio-actual"></h3>
+      <button class="borrar-ejercicio" onclick="confirmarBorrarEjercicio()" aria-label="Borrar ejercicio">🗑️</button>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-card tooltip">
+        <div class="stat-label">Peso Máximo</div>
+        <div class="stat-value" id="peso-maximo">-</div>
+        <span class="tooltiptext">El peso más alto registrado</span>
+      </div>
+      <div class="stat-card tooltip">
+        <div class="stat-label" id="valor-maximo-label">Reps Máximas</div>
+        <div class="stat-value" id="valor-maximo">-</div>
+        <span class="tooltiptext" id="valor-maximo-tooltip">Las repeticiones más altas registradas</span>
+      </div>
+      <div class="stat-card tooltip">
+        <div class="stat-label">Total Series</div>
+        <div class="stat-value" id="total-series">-</div>
+        <span class="tooltiptext">Número total de series registradas</span>
+      </div>
+    </div>
+
+    <div class="peso-corporal-container">
+      <input type="checkbox" id="pesoCorporal" onchange="togglePesoCorporal()">
+      <label for="pesoCorporal">Peso corporal</label>
+    </div>
+
+    <input type="number" id="peso" placeholder="Peso (kg)" step="0.5" />
+    <input type="number" id="reps" placeholder="Repeticiones" min="1" />
+
+    <div class="fecha-container">
+      <label for="fecha">Fecha y hora (opcional)</label>
+      <input type="datetime-local" id="fecha">
+    </div>
+
+    <button onclick="guardarRegistro()">Guardar</button>
+
+    <div class="vista-selector">
+      <button class="vista-btn activo" onclick="cambiarVistaGraficos('normal')">Vista detallada</button>
+      <button class="vista-btn" onclick="cambiarVistaGraficos('agrupado')">Vista por días</button>
+    </div>
+
+    <div class="graficos-container">
+      <div class="grafico-container">
+        <h3 class="grafico-titulo">Progreso de Repeticiones</h3>
+        <canvas id="graficoReps"></canvas>
+      </div>
+
+      <div class="grafico-container" id="contenedor-grafico-peso">
+        <h3 class="grafico-titulo">Progreso de Peso</h3>
+        <canvas id="graficoPeso"></canvas>
+      </div>
+    </div>
+
+    <div class="header-historial">
+      <h3>Historial</h3>
+      <button class="borrar-historial" onclick="confirmarBorrarHistorial()" aria-label="Borrar historial">🗑️</button>
+    </div>
+    <div id="historial"></div>
+  </div>
+
+  <script>
+    let ejercicioSeleccionado = '';
+    let tipoEjercicioSeleccionado = 'repeticiones';
+    let graficoReps = null;
+    let graficoPeso = null;
+    let graficosAgrupados = false;
+
+    const cambiarTipoEjercicio = (tipo) => {
+      tipoEjercicioSeleccionado = tipo;
+      const botones = document.querySelectorAll('.tipo-btn');
+      botones.forEach(btn => {
+        btn.classList.toggle('activo', btn.dataset.tipo === tipo);
+      });
+    };
+
+    const mostrarUltimosRegistros = () => {
+      const contenedor = document.getElementById('registros-recientes');
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      
+      const ultimosRegistros = [...registros]
+        .map(r => ({
+          ...r,
+          fechaObj: new Date(r.fecha.split(', ')[0].split('/').reverse().join('-') + ' ' + r.fecha.split(', ')[1])
+        }))
+        .sort((a, b) => b.fechaObj - a.fechaObj)
+        .slice(0, 5)
+        .map(r => ({
+          ejercicio: r.ejercicio,
+          peso: r.peso,
+          valor: r.tipo === 'tiempo' ? r.tiempo : r.reps,
+          tipo: r.tipo,
+          fecha: r.fecha
+        }));
+
+      contenedor.innerHTML = ultimosRegistros.map(r =>
+        `<div class="registro-reciente">
+          <strong>${r.ejercicio}</strong>: ${r.peso}kg x ${r.valor} ${r.tipo === 'tiempo' ? 'seg' : 'reps'}
+          <small>${r.fecha}</small>
+        </div>`
+      ).join('');
+    };
+
+    const mostrarPantalla = (id) => {
+      document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+      document.getElementById(id).classList.add('activa');
+      if (id === 'pantalla-seleccion') {
+        mostrarUltimosRegistros();
+      }
+    };
+
+    const seleccionarEjercicio = (nombre) => {
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      const ejercicio = ejercicios.find(e => e.nombre === nombre);
+      
+      if (ejercicio) {
+        ejercicioSeleccionado = ejercicio.nombre;
+        tipoEjercicioSeleccionado = ejercicio.tipo;
+        document.getElementById('ejercicio-actual').textContent = ejercicio.nombre;
+        
+        // Actualizar la interfaz según el tipo de ejercicio
+        actualizarInterfazPorTipo(ejercicio.tipo);
+        
+        mostrarHistorial();
+        mostrarPantalla('pantalla-registro');
+      }
+    };
+
+    const actualizarInterfazPorTipo = (tipo) => {
+      const repsInput = document.getElementById('reps');
+      const valorMaximoLabel = document.getElementById('valor-maximo-label');
+      const valorMaximoTooltip = document.getElementById('valor-maximo-tooltip');
+      
+      if (tipo === 'tiempo') {
+        repsInput.placeholder = 'Tiempo (segundos)';
+        valorMaximoLabel.textContent = 'Tiempo Máximo';
+        valorMaximoTooltip.textContent = 'El tiempo más largo registrado';
+      } else {
+        repsInput.placeholder = 'Repeticiones';
+        valorMaximoLabel.textContent = 'Reps Máximas';
+        valorMaximoTooltip.textContent = 'Las repeticiones más altas registradas';
+      }
+      
+      repsInput.step = '1';
+      repsInput.min = '1';
+    };
+
+    const actualizarBotonesEjercicios = () => {
+      const contenedor = document.querySelector('.ejercicios-guardados');
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      
+      contenedor.innerHTML = ejercicios.map(ejercicio => 
+        `<button class="ejercicio-btn" onclick="seleccionarEjercicio('${ejercicio.nombre}')">
+          ${ejercicio.nombre}
+          <span class="badge badge-${ejercicio.tipo === 'tiempo' ? 'primary' : 'success'}">
+            ${ejercicio.tipo === 'tiempo' ? '⏱️' : '🔄'}
+          </span>
+        </button>`
+      ).join('');
+    };
+
+    const continuarARegistro = () => {
+      const ejercicio = document.getElementById('ejercicio').value.trim();
+      if (!ejercicio) {
+        alert('Por favor, escribe un ejercicio');
+        return;
+      }
+
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      const ejercicioExistente = ejercicios.find(e => e.nombre === ejercicio);
+      
+      if (ejercicioExistente) {
+        if (ejercicioExistente.tipo !== tipoEjercicioSeleccionado) {
+          alert('Este ejercicio ya existe con un tipo diferente');
+          return;
+        }
+      } else {
+        ejercicios.push({
+          nombre: ejercicio,
+          tipo: tipoEjercicioSeleccionado
+        });
+        localStorage.setItem('ejerciciosGuardados', JSON.stringify(ejercicios));
+      }
+      
+      ejercicioSeleccionado = ejercicio;
+      document.getElementById('ejercicio-actual').textContent = ejercicio;
+      document.getElementById('ejercicio').value = '';
+      actualizarBotonesEjercicios();
+      
+      // Actualizar la interfaz según el tipo de ejercicio
+      actualizarInterfazPorTipo(tipoEjercicioSeleccionado);
+      
+      mostrarHistorial();
+      mostrarPantalla('pantalla-registro');
+    };
+
+    const volverASeleccion = () => {
+      mostrarPantalla('pantalla-seleccion');
+    };
+
+    const togglePesoCorporal = () => {
+      const pesoCorporalChecked = document.getElementById('pesoCorporal').checked;
+      const pesoInput = document.getElementById('peso');
+      pesoInput.classList.toggle('oculto', pesoCorporalChecked);
+      if (pesoCorporalChecked) {
+        pesoInput.value = '';
+      }
+    };
+
+    const toggleTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      actualizarGraficos();
+    };
+
+    const loadTheme = () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    };
+
+    const cambiarVistaGraficos = (tipo) => {
+      const botones = document.querySelectorAll('.vista-btn');
+      botones.forEach(btn => btn.classList.remove('activo'));
+      
+      if (tipo === 'agrupado') {
+        graficosAgrupados = true;
+        botones[1].classList.add('activo');
+      } else {
+        graficosAgrupados = false;
+        botones[0].classList.add('activo');
+      }
+      
+      actualizarGraficos();
+    };
+
+    const agruparDatosPorDia = (registros) => {
+      const datosPorDia = {};
+      
+      registros.forEach(r => {
+        const fecha = r.fecha.split(', ')[0];
+        if (!datosPorDia[fecha]) {
+          datosPorDia[fecha] = {
+            pesos: [],
+            valor: 0,
+            pesoCorporal: false
+          };
+        }
+        
+        if (r.pesoCorporal) {
+          datosPorDia[fecha].pesoCorporal = true;
+        } else {
+          datosPorDia[fecha].pesos.push(parseFloat(r.peso));
+        }
+
+        // Para tiempo sumamos, para repeticiones también
+        datosPorDia[fecha].valor += parseInt(r.tipo === 'tiempo' ? r.tiempo : r.reps);
+      });
+
+      return Object.entries(datosPorDia).map(([fecha, datos]) => ({
+        fecha,
+        peso: datos.pesoCorporal ? null : 
+              datos.pesos.length > 0 ? 
+              (datos.pesos.reduce((a, b) => a + b, 0) / datos.pesos.length).toFixed(1) : null,
+        [tipoEjercicioSeleccionado === 'tiempo' ? 'tiempo' : 'reps']: datos.valor,
+        tipo: tipoEjercicioSeleccionado,
+        pesoCorporal: datos.pesoCorporal
+      }));
+    };
+
+    const actualizarGraficos = () => {
+      const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDarkMode ? '#ffffff' : '#333333';
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      let registrosEjercicio = registros
+        .filter(r => r.ejercicio === ejercicioSeleccionado)
+        .map(r => {
+          const [fecha, hora] = r.fecha.split(', ');
+          const [dia, mes, año] = fecha.split('/');
+          const [horas, minutos, segundos] = hora.split(':');
+          const fechaObj = new Date(año, mes - 1, dia, horas, minutos, segundos);
+          
+          return {
+            ...r,
+            fechaObj
+          };
+        })
+        .sort((a, b) => a.fechaObj - b.fechaObj);
+
+      if (graficosAgrupados) {
+        registrosEjercicio = agruparDatosPorDia(registrosEjercicio);
+      }
+
+      const etiquetasFecha = registrosEjercicio.map(r => {
+        if (graficosAgrupados) {
+          return r.fecha;
+        }
+        const fecha = r.fecha.split(', ')[0];
+        const hora = r.fecha.split(', ')[1];
+        return `${fecha}\n${hora}`;
+      });
+
+      const esTiempo = tipoEjercicioSeleccionado === 'tiempo';
+      const labelBase = esTiempo ? 'Tiempo' : 'Repeticiones';
+      const unidad = esTiempo ? 'seg' : 'reps';
+
+      const datosValor = {
+        labels: etiquetasFecha,
+        datasets: [{
+          label: graficosAgrupados ? `${labelBase} total` : labelBase,
+          data: registrosEjercicio.map(r => esTiempo ? r.tiempo : r.reps),
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      };
+
+      const datosPeso = {
+        labels: etiquetasFecha,
+        datasets: [{
+          label: graficosAgrupados ? 'Peso promedio (kg)' : 'Peso (kg)',
+          data: registrosEjercicio.map(r => r.pesoCorporal ? null : r.peso),
+          borderColor: '#2196F3',
+          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      };
+
+      if (graficoReps) {
+        graficoReps.destroy();
+      }
+      if (graficoPeso) {
+        graficoPeso.destroy();
+      }
+
+      const ctxReps = document.getElementById('graficoReps').getContext('2d');
+      const ctxPeso = document.getElementById('graficoPeso').getContext('2d');
+
+      graficoReps = new Chart(ctxReps, {
+        type: 'line',
+        data: datosValor,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                title: (context) => {
+                  return context[0].label.replace('\n', ' ');
+                },
+                label: (context) => {
+                  const valor = context.raw;
+                  return `${labelBase}: ${valor} ${unidad}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+                callback: function(value, index) {
+                  return this.getLabelForValue(value).split('\n')[0];
+                },
+                color: textColor
+              },
+              grid: {
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1,
+                color: textColor
+              },
+              grid: {
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              },
+              title: {
+                display: true,
+                text: graficosAgrupados ? `${labelBase} total (${unidad})` : `${labelBase} (${unidad})`,
+                color: textColor
+              }
+            }
+          }
+        }
+      });
+
+      graficoPeso = new Chart(ctxPeso, {
+        type: 'line',
+        data: datosPeso,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                title: (context) => {
+                  return context[0].label.replace('\n', ' ');
+                },
+                label: function(context) {
+                  const value = context.raw;
+                  if (value === null) {
+                    return 'Peso: Peso corporal';
+                  }
+                  if (graficosAgrupados) {
+                    return `Peso promedio: ${value} kg`;
+                  }
+                  return 'Peso: ' + value + ' kg';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 45,
+                minRotation: 45,
+                callback: function(value, index) {
+                  return this.getLabelForValue(value).split('\n')[0];
+                },
+                color: textColor
+              },
+              grid: {
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: textColor
+              },
+              grid: {
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              },
+              title: {
+                display: true,
+                text: graficosAgrupados ? 'Peso promedio (kg)' : 'Peso (kg)',
+                color: textColor
+              }
+            }
+          }
+        }
+      });
+    };
+
+    const actualizarEstadisticas = () => {
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
+
+      const pesoMaximo = registrosEjercicio
+        .filter(r => !r.pesoCorporal)
+        .reduce((max, r) => Math.max(max, parseFloat(r.peso) || 0), 0);
+      
+      const valorMaximo = registrosEjercicio
+        .reduce((max, r) => Math.max(max, r.tipo === 'tiempo' ? r.tiempo : r.reps || 0), 0);
+      
+      const totalSeries = registrosEjercicio.length;
+
+      document.getElementById('peso-maximo').textContent = pesoMaximo > 0 ? `${pesoMaximo}kg` : '-';
+      document.getElementById('valor-maximo').textContent = valorMaximo > 0 ? 
+        `${valorMaximo}${tipoEjercicioSeleccionado === 'tiempo' ? ' seg' : ''}` : '-';
+      document.getElementById('total-series').textContent = totalSeries;
+    };
+
+    const mostrarHistorial = () => {
+      const contenedor = document.getElementById('historial');
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosEjercicio = registros
+        .filter(r => r.ejercicio === ejercicioSeleccionado)
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      
+      contenedor.innerHTML = registrosEjercicio.map(r => {
+        const esPesoCorporal = r.pesoCorporal;
+        const pesoTexto = esPesoCorporal ? 'Peso corporal' : `${r.peso}kg`;
+        const badge = esPesoCorporal ? 
+          '<span class="badge badge-primary">Peso corporal</span>' : '';
+        const valor = r.tipo === 'tiempo' ? `${r.tiempo} seg` : `${r.reps} reps`;
+        
+        return `<div class="registro">
+          <div class="registro-contenido">
+            ${pesoTexto} x ${valor} ${badge}<br/>
+            <small>${r.fecha}</small>
+          </div>
+          <button class="borrar-registro" onclick="borrarRegistroIndividual('${r.fecha}')" aria-label="Borrar registro">🗑️</button>
+        </div>`;
+      }).join('');
+
+      actualizarGraficos();
+      actualizarEstadisticas();
+    };
+
+    const guardarRegistro = () => {
+      const pesoCorporalChecked = document.getElementById('pesoCorporal').checked;
+      const peso = pesoCorporalChecked ? 'Peso corporal' : document.getElementById('peso').value;
+      const valor = document.getElementById('reps').value;
+      const fechaInput = document.getElementById('fecha').value;
+      
+      if (!pesoCorporalChecked && !peso || !valor) {
+        alert("Completa todos los campos necesarios");
+        return;
+      }
+
+      if (parseInt(valor) < 1) {
+        alert(tipoEjercicioSeleccionado === 'tiempo' ? 
+          "El tiempo debe ser al menos 1 segundo" : 
+          "Las repeticiones deben ser al menos 1");
+        return;
+      }
+
+      if (!pesoCorporalChecked && !peso) {
+        alert("Ingresa un valor para el peso");
+        return;
+      }
+
+      const fecha = fechaInput ? 
+        new Date(fechaInput).toLocaleString() : 
+        new Date().toLocaleString();
+
+      const nuevo = { 
+        ejercicio: ejercicioSeleccionado,
+        tipo: tipoEjercicioSeleccionado,
+        peso,
+        [tipoEjercicioSeleccionado === 'tiempo' ? 'tiempo' : 'reps']: parseInt(valor),
+        fecha,
+        pesoCorporal: pesoCorporalChecked
+      };
+      
+      document.body.classList.add('loading');
+      
+      setTimeout(() => {
+        const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+        registros.push(nuevo);
+        localStorage.setItem('registros', JSON.stringify(registros));
+        
+        mostrarHistorial();
+        mostrarUltimosRegistros();
+        
+        if (!pesoCorporalChecked) {
+          document.getElementById('peso').value = '';
+        }
+        document.getElementById('reps').value = '';
+        document.getElementById('fecha').value = '';
+        
+        document.body.classList.remove('loading');
+      }, 300);
+    };
+
+    const borrarRegistroIndividual = (fecha) => {
+      if (confirm("¿Estás seguro de que quieres borrar este registro?")) {
+        const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+        const nuevosRegistros = registros.filter(r => 
+          !(r.ejercicio === ejercicioSeleccionado && r.fecha === fecha)
+        );
+        localStorage.setItem('registros', JSON.stringify(nuevosRegistros));
+        mostrarHistorial();
+        mostrarUltimosRegistros();
+      }
+    };
+
+    const confirmarBorrarHistorial = () => {
+      if (confirm("¿Estás seguro de que quieres borrar todo el historial de este ejercicio?")) {
+        const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+        const nuevosRegistros = registros.filter(r => r.ejercicio !== ejercicioSeleccionado);
+        localStorage.setItem('registros', JSON.stringify(nuevosRegistros));
+        mostrarHistorial();
+      }
+    };
+
+    const confirmarBorrarEjercicio = () => {
+      if (confirm("¿Estás seguro de que quieres borrar este ejercicio?")) {
+        const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+        const nuevoEjercicios = ejercicios.filter(e => e.nombre !== ejercicioSeleccionado);
+        localStorage.setItem('ejerciciosGuardados', JSON.stringify(nuevoEjercicios));
+        actualizarBotonesEjercicios();
+        mostrarHistorial();
+        mostrarPantalla('pantalla-seleccion');
+      }
+    };
+
+    // Inicialización
+    loadTheme();
+    actualizarBotonesEjercicios();
+    mostrarUltimosRegistros();
+  </script>
+</body>
+</html>

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>App de Gimnasio</title>
+  <title>GymCount</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -18,6 +19,8 @@
       --success-color: #48bb78;
       --danger-color: #f56565;
       --accent-color: #805ad5;
+      --gradient-start: #4299e1;
+      --gradient-end: #805ad5;
     }
 
     [data-theme="dark"] {
@@ -31,6 +34,8 @@
       --success-color: #68d391;
       --danger-color: #fc8181;
       --accent-color: #b794f4;
+      --gradient-start: #63b3ed;
+      --gradient-end: #b794f4;
     }
 
     * {
@@ -42,7 +47,7 @@
     body {
       font-family: 'Inter', sans-serif;
       padding: 1.5em;
-      max-width: 600px;
+      max-width: 800px;
       margin: auto;
       background-color: var(--bg-color);
       color: var(--text-color);
@@ -54,6 +59,19 @@
       font-weight: 600;
       margin-bottom: 1em;
       color: var(--text-color);
+      position: relative;
+      padding-bottom: 0.5em;
+    }
+
+    h2::after, h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      border-radius: 3px;
     }
 
     input, select, button {
@@ -65,7 +83,7 @@
       background-color: var(--card-bg);
       color: var(--text-color);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 12px;
       font-family: 'Inter', sans-serif;
       transition: all 0.2s ease;
     }
@@ -77,21 +95,23 @@
     }
 
     button {
-      background-color: var(--primary-color);
+      display: block;
+      margin: 0.75em 0;
+      width: 100%;
+      padding: 0.75em;
+      font-size: 1em;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
       color: white;
       border: none;
+      border-radius: 12px;
       cursor: pointer;
       font-weight: 500;
-      transition: transform 0.2s, background-color 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     button:hover {
-      background-color: var(--accent-color);
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(0);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
     }
 
     .theme-toggle {
@@ -112,8 +132,144 @@
       margin-bottom: 1.5em;
       background: var(--card-bg);
       padding: 1.5em;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .ejercicio-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px var(--shadow-color);
+    }
+
+    .categorias-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75em;
+      margin: 1em 0;
+    }
+
+    .categoria-btn {
+      text-align: left;
+      padding: 0.75em 1em;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 2px 4px var(--shadow-color);
+      transition: all 0.2s;
+      cursor: pointer;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .categoria-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 0;
+    }
+
+    .categoria-btn.activo::before {
+      opacity: 1;
+    }
+
+    .categoria-btn.activo {
+      color: white;
+      border-color: transparent;
+    }
+
+    .categoria-nombre {
+      position: relative;
+      z-index: 1;
+    }
+
+    .editar-icono {
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-size: 0.9em;
+      cursor: pointer;
+      padding: 0.3em;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+    }
+
+    .categoria-btn:hover .editar-icono {
+      opacity: 1;
+    }
+
+    .editar-icono:hover {
+      color: var(--primary-color);
+    }
+
+    .modal-edicion-categoria .acciones-container {
+      display: flex;
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .modal-edicion-categoria .acciones-container button {
+      flex: 1;
+    }
+
+    .modal-edicion-categoria .acciones-container button.borrar {
+      background: var(--danger-color);
+    }
+
+    .modal-edicion-categoria .acciones-container button.borrar:hover {
+      background: var(--danger-color);
+      opacity: 0.9;
+    }
+
+    .modal-edicion-categoria {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-edicion-categoria .modal-contenido {
+      background: var(--card-bg);
+      padding: 1.5em;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .modal-edicion-categoria .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1em;
+    }
+
+    .modal-edicion-categoria .cerrar-modal {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0.2em;
+      width: auto;
     }
 
     .ejercicios-guardados {
@@ -133,6 +289,18 @@
       display: flex;
       align-items: center;
       gap: 0.5em;
+      position: relative;
+    }
+
+    .ejercicio-btn .categoria-badge {
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+      font-size: 0.7em;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      background: var(--primary-color);
+      color: white;
     }
 
     .ejercicio-btn:hover {
@@ -241,7 +409,61 @@
       padding: 1.5em;
       background: var(--card-bg);
       border-radius: 12px;
-      box-shadow: 0 2px 4px var(--shadow-color);
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .grafico-dias-categorias {
+      margin-top: 2em;
+      padding: 1.5em;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s;
+    }
+
+    .grafico-dias-categorias:hover {
+      transform: translateY(-2px);
+    }
+
+    .grafico-dias-categorias h3 {
+      margin-bottom: 1em;
+    }
+
+    .grafico-dias-container {
+      height: 300px;
+      position: relative;
+    }
+
+    .selector-periodo-grafico {
+      display: flex;
+      gap: 0.5em;
+      margin-bottom: 1em;
+      background: var(--card-bg);
+      padding: 0.5em;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .periodo-grafico-btn {
+      flex: 1;
+      padding: 0.75em;
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 0.9em;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .periodo-grafico-btn.activo {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      color: white;
+    }
+
+    .periodo-grafico-btn:not(.activo):hover {
+      background: var(--border-color);
     }
 
     .registro-reciente {
@@ -357,6 +579,18 @@
 
       .stats-container {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .categorias-container {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-card-avanzada {
+        padding: 1.2em;
       }
     }
 
@@ -536,11 +770,260 @@
     .tipo-btn:not(.activo):hover {
       background: var(--border-color);
     }
+
+    .header-ejercicio {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+      padding: 1em;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .editar-ejercicio {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 0.2em;
+      width: auto;
+      transition: all 0.2s;
+    }
+
+    .editar-ejercicio:hover {
+      transform: scale(1.1);
+      background: none;
+    }
+
+    .modal-edicion {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-contenido {
+      background: var(--card-bg);
+      padding: 2em;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5em;
+    }
+
+    .cerrar-modal {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.5em;
+      cursor: pointer;
+      padding: 0.2em;
+      width: auto;
+    }
+
+    .modal-categorias {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5em;
+      margin: 1em 0;
+    }
+
+    .modal-categoria-btn {
+      text-align: center;
+      padding: 0.5em;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: all 0.2s;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .modal-categoria-btn.activo {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .stats-avanzadas {
+      margin-top: 2em;
+      padding: 1.5em;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .stat-card-avanzada {
+      background: var(--card-bg);
+      padding: 1.5em;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card-avanzada:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5em;
+    }
+
+    .stat-header h4 {
+      margin: 0;
+      font-size: 0.9em;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .badge-tendencia {
+      font-size: 0.8em;
+      padding: 0.2em 0.5em;
+      border-radius: 4px;
+      background: var(--success-color);
+      color: white;
+    }
+
+    .badge-tendencia.negativo {
+      background: var(--danger-color);
+    }
+
+    .stat-content {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2em;
+      font-weight: 600;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0.2em 0;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .grafico-evolucion {
+      margin-top: 2em;
+      padding: 1.5em;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 6px var(--shadow-color);
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s;
+    }
+
+    .grafico-evolucion:hover {
+      transform: translateY(-2px);
+    }
+
+    .grafico-evolucion-container {
+      height: 300px;
+      position: relative;
+    }
+
+    .objetivo-container {
+      display: none;
+    }
+
+    .objetivo-input {
+      display: none;
+    }
+
+    .progreso-objetivo {
+      display: none;
+    }
+
+    .progreso-item {
+      display: none;
+    }
+
+    .progreso-label {
+      display: none;
+    }
+
+    .progreso-bar {
+      display: none;
+    }
+
+    .progreso-fill {
+      display: none;
+    }
+
+    .progreso-porcentaje {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .objetivo-input {
+        grid-template-columns: 1fr;
+      }
+
+      .objetivo-input button {
+        grid-column: span 1;
+      }
+    }
+
+    .exportar-container {
+      margin: 1.5em 0;
+      padding: 1.5em;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .exportar-opciones {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    .exportar-opciones button {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .exportar-opciones button:hover {
+      background: var(--primary-color);
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-
   <div id="pantalla-seleccion" class="pantalla activa">
     <h2>Selección de Ejercicio</h2>
     
@@ -556,6 +1039,13 @@
           Tiempo
         </button>
       </div>
+      <div class="nueva-categoria-container">
+        <input type="text" id="nueva-categoria" placeholder="Nueva categoría" />
+        <button onclick="agregarCategoria()">Agregar</button>
+      </div>
+      <div class="categorias-container" id="categorias-container">
+        <!-- Las categorías se cargarán dinámicamente -->
+      </div>
       <button onclick="continuarARegistro()">Continuar</button>
     </div>
 
@@ -563,9 +1053,23 @@
       <!-- Ejercicios guardados se cargarán dinámicamente -->
     </div>
 
-    <div class="ultimos-registros">
-      <h3>Últimos registros</h3>
-      <div id="registros-recientes"></div>
+    <div class="grafico-dias-categorias">
+      <h3>Días Entrenados por Categoría</h3>
+      <div class="selector-periodo-grafico">
+        <button class="periodo-grafico-btn activo" onclick="cambiarPeriodoGrafico('semana')">Última semana</button>
+        <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('mes')">Último mes</button>
+        <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('historico')">Histórico</button>
+      </div>
+      <div class="grafico-dias-container">
+        <canvas id="graficoDiasCategorias"></canvas>
+      </div>
+    </div>
+
+    <div class="grafico-evolucion">
+      <h3>Evolución Temporal</h3>
+      <div class="grafico-evolucion-container">
+        <canvas id="graficoEvolucion"></canvas>
+      </div>
     </div>
   </div>
 
@@ -574,7 +1078,10 @@
     
     <div class="header-ejercicio">
       <h3 class="ejercicio-titulo" id="ejercicio-actual"></h3>
-      <button class="borrar-ejercicio" onclick="confirmarBorrarEjercicio()" aria-label="Borrar ejercicio">🗑️</button>
+      <div>
+        <button class="editar-ejercicio" onclick="mostrarModalEdicion()" aria-label="Editar ejercicio">✏️</button>
+        <button class="borrar-ejercicio" onclick="confirmarBorrarEjercicio()" aria-label="Borrar ejercicio">🗑️</button>
+      </div>
     </div>
 
     <div class="stats-container">
@@ -595,17 +1102,54 @@
       </div>
     </div>
 
-    <div class="peso-corporal-container">
-      <input type="checkbox" id="pesoCorporal" onchange="togglePesoCorporal()">
-      <label for="pesoCorporal">Peso corporal</label>
+    <div class="stats-avanzadas">
+      <h3>Estadísticas Avanzadas</h3>
+      <div class="stats-grid">
+        <div class="stat-card-avanzada">
+          <div class="stat-header">
+            <h4>Volumen Total</h4>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="volumen-total">-</div>
+            <div class="stat-label">kg × reps</div>
+          </div>
+        </div>
+        <div class="stat-card-avanzada">
+          <div class="stat-header">
+            <h4>1RM Estimado</h4>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="rm-estimado">-</div>
+            <div class="stat-label">kg</div>
+          </div>
+        </div>
+        <div class="stat-card-avanzada">
+          <div class="stat-header">
+            <h4>Progresión Semanal</h4>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="progresion-mensual">-</div>
+            <div class="stat-label">kg/semana</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exportar-container">
+      <h3>Exportar Datos</h3>
+      <div class="exportar-opciones">
+        <button onclick="exportarDatos('json')">Exportar JSON</button>
+        <button onclick="exportarDatos('csv')">Exportar CSV</button>
+        <button onclick="exportarDatos('pdf')">Exportar PDF</button>
+      </div>
     </div>
 
     <input type="number" id="peso" placeholder="Peso (kg)" step="0.5" />
     <input type="number" id="reps" placeholder="Repeticiones" min="1" />
 
     <div class="fecha-container">
-      <label for="fecha">Fecha y hora (opcional)</label>
-      <input type="datetime-local" id="fecha">
+      <label for="fecha">Fecha (opcional)</label>
+      <input type="date" id="fecha">
     </div>
 
     <button onclick="guardarRegistro()">Guardar</button>
@@ -634,12 +1178,52 @@
     <div id="historial"></div>
   </div>
 
+  <div class="modal-edicion" id="modal-edicion">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <h3>Editar Ejercicio</h3>
+        <button class="cerrar-modal" onclick="cerrarModalEdicion()">×</button>
+      </div>
+      <input type="text" id="nuevo-nombre" placeholder="Nuevo nombre del ejercicio" />
+      <div class="modal-categorias">
+        <button class="modal-categoria-btn" data-categoria="pecho" onclick="seleccionarCategoriaEdicion('pecho')">Pecho</button>
+        <button class="modal-categoria-btn" data-categoria="espalda" onclick="seleccionarCategoriaEdicion('espalda')">Espalda</button>
+        <button class="modal-categoria-btn" data-categoria="piernas" onclick="seleccionarCategoriaEdicion('piernas')">Piernas</button>
+        <button class="modal-categoria-btn" data-categoria="hombros" onclick="seleccionarCategoriaEdicion('hombros')">Hombros</button>
+        <button class="modal-categoria-btn" data-categoria="brazos" onclick="seleccionarCategoriaEdicion('brazos')">Brazos</button>
+        <button class="modal-categoria-btn" data-categoria="core" onclick="seleccionarCategoriaEdicion('core')">Core</button>
+        <button class="modal-categoria-btn" data-categoria="cardio" onclick="seleccionarCategoriaEdicion('cardio')">Cardio</button>
+        <button class="modal-categoria-btn" data-categoria="otro" onclick="seleccionarCategoriaEdicion('otro')">Otro</button>
+      </div>
+      <button onclick="guardarEdicionEjercicio()">Guardar Cambios</button>
+    </div>
+  </div>
+
+  <div class="modal-edicion-categoria" id="modal-edicion-categoria">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <h3>Editar Categoría</h3>
+        <button class="cerrar-modal" onclick="cerrarModalEdicionCategoria()">×</button>
+      </div>
+      <input type="text" id="nuevo-nombre-categoria" placeholder="Nuevo nombre de la categoría" />
+      <div class="acciones-container">
+        <button onclick="guardarEdicionCategoria()">Guardar Cambios</button>
+        <button class="borrar" onclick="borrarCategoria(categoriaEnEdicion)">Borrar Categoría</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let ejercicioSeleccionado = '';
     let tipoEjercicioSeleccionado = 'repeticiones';
+    let categoriaSeleccionada = '';
     let graficoReps = null;
     let graficoPeso = null;
     let graficosAgrupados = false;
+    let categoriaEdicionSeleccionada = '';
+    let categoriaEnEdicion = '';
+    let graficoDiasCategorias = null;
+    let periodoGrafico = 'semana';
 
     const cambiarTipoEjercicio = (tipo) => {
       tipoEjercicioSeleccionado = tipo;
@@ -649,31 +1233,95 @@
       });
     };
 
-    const mostrarUltimosRegistros = () => {
-      const contenedor = document.getElementById('registros-recientes');
-      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+    const cargarCategorias = () => {
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      const contenedor = document.getElementById('categorias-container');
       
-      const ultimosRegistros = [...registros]
-        .map(r => ({
-          ...r,
-          fechaObj: new Date(r.fecha.split(', ')[0].split('/').reverse().join('-') + ' ' + r.fecha.split(', ')[1])
-        }))
-        .sort((a, b) => b.fechaObj - a.fechaObj)
-        .slice(0, 5)
-        .map(r => ({
-          ejercicio: r.ejercicio,
-          peso: r.peso,
-          valor: r.tipo === 'tiempo' ? r.tiempo : r.reps,
-          tipo: r.tipo,
-          fecha: r.fecha
-        }));
+      contenedor.innerHTML = categorias.map(categoria => `
+        <button class="categoria-btn ${categoria === categoriaSeleccionada ? 'activo' : ''}" 
+                onclick="seleccionarCategoria('${categoria}')">
+          <div class="categoria-nombre">${categoria}</div>
+          <span class="editar-icono" onclick="mostrarModalEdicionCategoria('${categoria}', event)">✏️</span>
+        </button>
+      `).join('');
+    };
 
-      contenedor.innerHTML = ultimosRegistros.map(r =>
-        `<div class="registro-reciente">
-          <strong>${r.ejercicio}</strong>: ${r.peso}kg x ${r.valor} ${r.tipo === 'tiempo' ? 'seg' : 'reps'}
-          <small>${r.fecha}</small>
-        </div>`
+    const agregarCategoria = () => {
+      const input = document.getElementById('nueva-categoria');
+      const categoria = input.value.trim();
+      
+      if (!categoria) {
+        alert('Por favor, ingresa un nombre para la categoría');
+        return;
+      }
+
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      
+      if (categorias.includes(categoria)) {
+        alert('Esta categoría ya existe');
+        return;
+      }
+
+      categorias.push(categoria);
+      localStorage.setItem('categorias', JSON.stringify(categorias));
+      
+      input.value = '';
+      cargarCategorias();
+    };
+
+    const borrarCategoria = (categoria) => {
+      if (confirm(`¿Estás seguro de que quieres borrar la categoría "${categoria}"?`)) {
+        const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+        const nuevaCategorias = categorias.filter(c => c !== categoria);
+        localStorage.setItem('categorias', JSON.stringify(nuevaCategorias));
+        
+        // Actualizar ejercicios que usaban esta categoría
+        const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+        ejercicios.forEach(ejercicio => {
+          if (ejercicio.categoria === categoria) {
+            ejercicio.categoria = '';
+          }
+        });
+        localStorage.setItem('ejerciciosGuardados', JSON.stringify(ejercicios));
+        
+        if (categoriaSeleccionada === categoria) {
+          categoriaSeleccionada = '';
+        }
+        
+        cerrarModalEdicionCategoria();
+        cargarCategorias();
+        actualizarBotonesEjercicios();
+      }
+    };
+
+    const seleccionarCategoria = (categoria) => {
+      categoriaSeleccionada = categoria;
+      cargarCategorias();
+      filtrarEjerciciosPorCategoria(categoria);
+    };
+
+    const filtrarEjerciciosPorCategoria = (categoria) => {
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      const ejerciciosFiltrados = categoria === '' ? 
+        ejercicios : 
+        ejercicios.filter(e => e.categoria === categoria);
+      
+      const contenedor = document.querySelector('.ejercicios-guardados');
+      contenedor.innerHTML = ejerciciosFiltrados.map(ejercicio => 
+        `<button class="ejercicio-btn" onclick="seleccionarEjercicio('${ejercicio.nombre}')">
+          ${ejercicio.nombre}
+          <span class="badge badge-${ejercicio.tipo === 'tiempo' ? 'primary' : 'success'}">
+            ${ejercicio.tipo === 'tiempo' ? '⏱️' : '🔄'}
+          </span>
+          ${ejercicio.categoria ? `<span class="categoria-badge">${ejercicio.categoria}</span>` : ''}
+        </button>`
       ).join('');
+    };
+
+    const mostrarUltimosRegistros = () => {
+      actualizarGraficoDiasCategorias();
+      actualizarEstadisticasAvanzadas();
+      actualizarGraficoEvolucion();
     };
 
     const mostrarPantalla = (id) => {
@@ -691,9 +1339,9 @@
       if (ejercicio) {
         ejercicioSeleccionado = ejercicio.nombre;
         tipoEjercicioSeleccionado = ejercicio.tipo;
+        categoriaSeleccionada = ejercicio.categoria || 'otro';
         document.getElementById('ejercicio-actual').textContent = ejercicio.nombre;
         
-        // Actualizar la interfaz según el tipo de ejercicio
         actualizarInterfazPorTipo(ejercicio.tipo);
         
         mostrarHistorial();
@@ -721,17 +1369,7 @@
     };
 
     const actualizarBotonesEjercicios = () => {
-      const contenedor = document.querySelector('.ejercicios-guardados');
-      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
-      
-      contenedor.innerHTML = ejercicios.map(ejercicio => 
-        `<button class="ejercicio-btn" onclick="seleccionarEjercicio('${ejercicio.nombre}')">
-          ${ejercicio.nombre}
-          <span class="badge badge-${ejercicio.tipo === 'tiempo' ? 'primary' : 'success'}">
-            ${ejercicio.tipo === 'tiempo' ? '⏱️' : '🔄'}
-          </span>
-        </button>`
-      ).join('');
+      filtrarEjerciciosPorCategoria(categoriaSeleccionada);
     };
 
     const continuarARegistro = () => {
@@ -752,7 +1390,8 @@
       } else {
         ejercicios.push({
           nombre: ejercicio,
-          tipo: tipoEjercicioSeleccionado
+          tipo: tipoEjercicioSeleccionado,
+          categoria: categoriaSeleccionada
         });
         localStorage.setItem('ejerciciosGuardados', JSON.stringify(ejercicios));
       }
@@ -762,7 +1401,6 @@
       document.getElementById('ejercicio').value = '';
       actualizarBotonesEjercicios();
       
-      // Actualizar la interfaz según el tipo de ejercicio
       actualizarInterfazPorTipo(tipoEjercicioSeleccionado);
       
       mostrarHistorial();
@@ -773,15 +1411,6 @@
       mostrarPantalla('pantalla-seleccion');
     };
 
-    const togglePesoCorporal = () => {
-      const pesoCorporalChecked = document.getElementById('pesoCorporal').checked;
-      const pesoInput = document.getElementById('peso');
-      pesoInput.classList.toggle('oculto', pesoCorporalChecked);
-      if (pesoCorporalChecked) {
-        pesoInput.value = '';
-      }
-    };
-
     const toggleTheme = () => {
       const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', theme);
@@ -790,8 +1419,7 @@
     };
 
     const loadTheme = () => {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.documentElement.setAttribute('data-theme', 'dark');
     };
 
     const cambiarVistaGraficos = (tipo) => {
@@ -850,10 +1478,8 @@
       let registrosEjercicio = registros
         .filter(r => r.ejercicio === ejercicioSeleccionado)
         .map(r => {
-          const [fecha, hora] = r.fecha.split(', ');
-          const [dia, mes, año] = fecha.split('/');
-          const [horas, minutos, segundos] = hora.split(':');
-          const fechaObj = new Date(año, mes - 1, dia, horas, minutos, segundos);
+          const [dia, mes, año] = r.fecha.split('/');
+          const fechaObj = new Date(año, mes - 1, dia);
           
           return {
             ...r,
@@ -866,14 +1492,7 @@
         registrosEjercicio = agruparDatosPorDia(registrosEjercicio);
       }
 
-      const etiquetasFecha = registrosEjercicio.map(r => {
-        if (graficosAgrupados) {
-          return r.fecha;
-        }
-        const fecha = r.fecha.split(', ')[0];
-        const hora = r.fecha.split(', ')[1];
-        return `${fecha}\n${hora}`;
-      });
+      const etiquetasFecha = registrosEjercicio.map(r => r.fecha);
 
       const esTiempo = tipoEjercicioSeleccionado === 'tiempo';
       const labelBase = esTiempo ? 'Tiempo' : 'Repeticiones';
@@ -895,7 +1514,7 @@
         labels: etiquetasFecha,
         datasets: [{
           label: graficosAgrupados ? 'Peso promedio (kg)' : 'Peso (kg)',
-          data: registrosEjercicio.map(r => r.pesoCorporal ? null : r.peso),
+          data: registrosEjercicio.map(r => r.peso),
           borderColor: '#2196F3',
           backgroundColor: 'rgba(33, 150, 243, 0.1)',
           tension: 0.4,
@@ -927,7 +1546,7 @@
               intersect: false,
               callbacks: {
                 title: (context) => {
-                  return context[0].label.replace('\n', ' ');
+                  return context[0].label;
                 },
                 label: (context) => {
                   const valor = context.raw;
@@ -941,9 +1560,6 @@
               ticks: {
                 maxRotation: 45,
                 minRotation: 45,
-                callback: function(value, index) {
-                  return this.getLabelForValue(value).split('\n')[0];
-                },
                 color: textColor
               },
               grid: {
@@ -983,13 +1599,10 @@
               intersect: false,
               callbacks: {
                 title: (context) => {
-                  return context[0].label.replace('\n', ' ');
+                  return context[0].label;
                 },
                 label: function(context) {
                   const value = context.raw;
-                  if (value === null) {
-                    return 'Peso: Peso corporal';
-                  }
                   if (graficosAgrupados) {
                     return `Peso promedio: ${value} kg`;
                   }
@@ -1003,9 +1616,6 @@
               ticks: {
                 maxRotation: 45,
                 minRotation: 45,
-                callback: function(value, index) {
-                  return this.getLabelForValue(value).split('\n')[0];
-                },
                 color: textColor
               },
               grid: {
@@ -1036,7 +1646,6 @@
       const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
 
       const pesoMaximo = registrosEjercicio
-        .filter(r => !r.pesoCorporal)
         .reduce((max, r) => Math.max(max, parseFloat(r.peso) || 0), 0);
       
       const valorMaximo = registrosEjercicio
@@ -1050,6 +1659,99 @@
       document.getElementById('total-series').textContent = totalSeries;
     };
 
+    const calcularEstadisticasAvanzadas = () => {
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
+
+      // Calcular volumen total
+      const volumenTotal = registrosEjercicio.reduce((total, r) => {
+        return total + (parseFloat(r.peso) * parseInt(r.reps));
+      }, 0);
+      document.getElementById('volumen-total').textContent = volumenTotal.toLocaleString();
+
+      // Calcular 1RM estimado (fórmula de Brzycki)
+      const calcular1RM = (peso, reps) => {
+        return peso * (36 / (37 - reps));
+      };
+
+      const rmEstimado = registrosEjercicio.reduce((max, r) => {
+        const rm = calcular1RM(parseFloat(r.peso), parseInt(r.reps));
+        return Math.max(max, rm);
+      }, 0);
+      document.getElementById('rm-estimado').textContent = rmEstimado.toFixed(1);
+
+      // Calcular progresión semanal
+      const ahora = new Date();
+      const semanaAnterior = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      const registrosSemanaActual = registrosEjercicio.filter(r => {
+        const [dia, mes, año] = r.fecha.split('/');
+        const fechaRegistro = new Date(año, mes - 1, dia);
+        return fechaRegistro >= semanaAnterior && fechaRegistro <= ahora;
+      });
+
+      const registrosSemanaAnterior = registrosEjercicio.filter(r => {
+        const [dia, mes, año] = r.fecha.split('/');
+        const fechaRegistro = new Date(año, mes - 1, dia);
+        const dosSemanasAtras = new Date(ahora.getTime() - 14 * 24 * 60 * 60 * 1000);
+        return fechaRegistro >= dosSemanasAtras && fechaRegistro < semanaAnterior;
+      });
+
+      const pesoPromedioActual = registrosSemanaActual.length > 0 ?
+        registrosSemanaActual.reduce((sum, r) => sum + parseFloat(r.peso), 0) / registrosSemanaActual.length : 0;
+      
+      const pesoPromedioAnterior = registrosSemanaAnterior.length > 0 ?
+        registrosSemanaAnterior.reduce((sum, r) => sum + parseFloat(r.peso), 0) / registrosSemanaAnterior.length : 0;
+
+      const progresion = pesoPromedioActual - pesoPromedioAnterior;
+      document.getElementById('progresion-mensual').textContent = progresion.toFixed(1);
+    };
+
+    const exportarDatos = (formato) => {
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
+      
+      let contenido = '';
+      let nombreArchivo = `${ejercicioSeleccionado}_${new Date().toISOString().split('T')[0]}`;
+      let tipoMIME = '';
+
+      switch(formato) {
+        case 'json':
+          contenido = JSON.stringify(registrosEjercicio, null, 2);
+          nombreArchivo += '.json';
+          tipoMIME = 'application/json';
+          break;
+        
+        case 'csv':
+          const headers = ['Fecha', 'Peso', 'Repeticiones', 'Tipo'];
+          const filas = registrosEjercicio.map(r => [
+            r.fecha,
+            r.peso,
+            r.tipo === 'tiempo' ? r.tiempo : r.reps,
+            r.tipo
+          ]);
+          contenido = [headers, ...filas].map(fila => fila.join(',')).join('\n');
+          nombreArchivo += '.csv';
+          tipoMIME = 'text/csv';
+          break;
+        
+        case 'pdf':
+          // Aquí podríamos implementar la generación de PDF
+          alert('La exportación a PDF está en desarrollo');
+          return;
+      }
+
+      const blob = new Blob([contenido], { type: tipoMIME });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
     const mostrarHistorial = () => {
       const contenedor = document.getElementById('historial');
       const registros = JSON.parse(localStorage.getItem('registros') || "[]");
@@ -1058,15 +1760,11 @@
         .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
       
       contenedor.innerHTML = registrosEjercicio.map(r => {
-        const esPesoCorporal = r.pesoCorporal;
-        const pesoTexto = esPesoCorporal ? 'Peso corporal' : `${r.peso}kg`;
-        const badge = esPesoCorporal ? 
-          '<span class="badge badge-primary">Peso corporal</span>' : '';
         const valor = r.tipo === 'tiempo' ? `${r.tiempo} seg` : `${r.reps} reps`;
         
         return `<div class="registro">
           <div class="registro-contenido">
-            ${pesoTexto} x ${valor} ${badge}<br/>
+            ${r.peso}kg x ${valor}<br/>
             <small>${r.fecha}</small>
           </div>
           <button class="borrar-registro" onclick="borrarRegistroIndividual('${r.fecha}')" aria-label="Borrar registro">🗑️</button>
@@ -1075,15 +1773,15 @@
 
       actualizarGraficos();
       actualizarEstadisticas();
+      calcularEstadisticasAvanzadas();
     };
 
     const guardarRegistro = () => {
-      const pesoCorporalChecked = document.getElementById('pesoCorporal').checked;
-      const peso = pesoCorporalChecked ? 'Peso corporal' : document.getElementById('peso').value;
+      const peso = document.getElementById('peso').value;
       const valor = document.getElementById('reps').value;
       const fechaInput = document.getElementById('fecha').value;
       
-      if (!pesoCorporalChecked && !peso || !valor) {
+      if (!peso || !valor) {
         alert("Completa todos los campos necesarios");
         return;
       }
@@ -1095,22 +1793,24 @@
         return;
       }
 
-      if (!pesoCorporalChecked && !peso) {
-        alert("Ingresa un valor para el peso");
-        return;
+      let fecha;
+      if (fechaInput) {
+        const [año, mes, dia] = fechaInput.split('-');
+        fecha = `${dia}/${mes}/${año}`;
+      } else {
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const año = hoy.getFullYear();
+        fecha = `${dia}/${mes}/${año}`;
       }
-
-      const fecha = fechaInput ? 
-        new Date(fechaInput).toLocaleString() : 
-        new Date().toLocaleString();
 
       const nuevo = { 
         ejercicio: ejercicioSeleccionado,
         tipo: tipoEjercicioSeleccionado,
         peso,
         [tipoEjercicioSeleccionado === 'tiempo' ? 'tiempo' : 'reps']: parseInt(valor),
-        fecha,
-        pesoCorporal: pesoCorporalChecked
+        fecha
       };
       
       document.body.classList.add('loading');
@@ -1123,9 +1823,7 @@
         mostrarHistorial();
         mostrarUltimosRegistros();
         
-        if (!pesoCorporalChecked) {
-          document.getElementById('peso').value = '';
-        }
+        document.getElementById('peso').value = '';
         document.getElementById('reps').value = '';
         document.getElementById('fecha').value = '';
         
@@ -1165,10 +1863,448 @@
       }
     };
 
+    const mostrarModalEdicion = () => {
+      const modal = document.getElementById('modal-edicion');
+      const nuevoNombre = document.getElementById('nuevo-nombre');
+      nuevoNombre.value = ejercicioSeleccionado;
+      categoriaEdicionSeleccionada = categoriaSeleccionada;
+      
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      const contenedorCategorias = modal.querySelector('.modal-categorias');
+      contenedorCategorias.innerHTML = categorias.map(categoria => `
+        <button class="modal-categoria-btn ${categoria === categoriaSeleccionada ? 'activo' : ''}" 
+                onclick="seleccionarCategoriaEdicion('${categoria}')">
+          ${categoria}
+        </button>
+      `).join('');
+      
+      modal.style.display = 'flex';
+    };
+
+    const cerrarModalEdicion = () => {
+      document.getElementById('modal-edicion').style.display = 'none';
+    };
+
+    const seleccionarCategoriaEdicion = (categoria) => {
+      categoriaEdicionSeleccionada = categoria;
+      document.querySelectorAll('.modal-categoria-btn').forEach(btn => {
+        btn.classList.toggle('activo', btn.dataset.categoria === categoria);
+      });
+    };
+
+    const guardarEdicionEjercicio = () => {
+      const nuevoNombre = document.getElementById('nuevo-nombre').value.trim();
+      
+      if (!nuevoNombre) {
+        alert('Por favor, ingresa un nombre para el ejercicio');
+        return;
+      }
+
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      
+      // Verificar si el nuevo nombre ya existe (excluyendo el ejercicio actual)
+      const ejercicioExistente = ejercicios.find(e => 
+        e.nombre === nuevoNombre && e.nombre !== ejercicioSeleccionado
+      );
+      
+      if (ejercicioExistente) {
+        alert('Ya existe un ejercicio con ese nombre');
+        return;
+      }
+
+      const ejercicioIndex = ejercicios.findIndex(e => e.nombre === ejercicioSeleccionado);
+      
+      if (ejercicioIndex !== -1) {
+        // Actualizar el ejercicio
+        ejercicios[ejercicioIndex].nombre = nuevoNombre;
+        ejercicios[ejercicioIndex].categoria = categoriaEdicionSeleccionada;
+        
+        // Actualizar los registros
+        const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+        registros.forEach(registro => {
+          if (registro.ejercicio === ejercicioSeleccionado) {
+            registro.ejercicio = nuevoNombre;
+          }
+        });
+        
+        localStorage.setItem('ejerciciosGuardados', JSON.stringify(ejercicios));
+        localStorage.setItem('registros', JSON.stringify(registros));
+        
+        ejercicioSeleccionado = nuevoNombre;
+        categoriaSeleccionada = categoriaEdicionSeleccionada;
+        
+        document.getElementById('ejercicio-actual').textContent = nuevoNombre;
+        actualizarBotonesEjercicios();
+        mostrarHistorial();
+        cerrarModalEdicion();
+      }
+    };
+
+    const mostrarModalEdicionCategoria = (categoria, event) => {
+      event.stopPropagation();
+      categoriaEnEdicion = categoria;
+      const modal = document.getElementById('modal-edicion-categoria');
+      const input = document.getElementById('nuevo-nombre-categoria');
+      input.value = categoria;
+      modal.style.display = 'flex';
+    };
+
+    const cerrarModalEdicionCategoria = () => {
+      document.getElementById('modal-edicion-categoria').style.display = 'none';
+      categoriaEnEdicion = '';
+    };
+
+    const guardarEdicionCategoria = () => {
+      const nuevoNombre = document.getElementById('nuevo-nombre-categoria').value.trim();
+      
+      if (!nuevoNombre) {
+        alert('Por favor, ingresa un nombre para la categoría');
+        return;
+      }
+
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      
+      if (categorias.includes(nuevoNombre) && nuevoNombre !== categoriaEnEdicion) {
+        alert('Ya existe una categoría con ese nombre');
+        return;
+      }
+
+      // Actualizar la categoría
+      const nuevaCategorias = categorias.map(c => 
+        c === categoriaEnEdicion ? nuevoNombre : c
+      );
+      localStorage.setItem('categorias', JSON.stringify(nuevaCategorias));
+      
+      // Actualizar ejercicios que usaban esta categoría
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      ejercicios.forEach(ejercicio => {
+        if (ejercicio.categoria === categoriaEnEdicion) {
+          ejercicio.categoria = nuevoNombre;
+        }
+      });
+      localStorage.setItem('ejerciciosGuardados', JSON.stringify(ejercicios));
+      
+      if (categoriaSeleccionada === categoriaEnEdicion) {
+        categoriaSeleccionada = nuevoNombre;
+      }
+      
+      cerrarModalEdicionCategoria();
+      cargarCategorias();
+      actualizarBotonesEjercicios();
+    };
+
+    const cambiarPeriodoGrafico = (periodo) => {
+      periodoGrafico = periodo;
+      document.querySelectorAll('.periodo-grafico-btn').forEach(btn => {
+        btn.classList.toggle('activo', btn.textContent.toLowerCase().includes(periodo));
+      });
+      actualizarGraficoDiasCategorias();
+    };
+
+    const obtenerDatosPeriodoGrafico = (registros, periodo) => {
+      const ahora = new Date();
+      let fechaInicio;
+      
+      switch(periodo) {
+        case 'semana':
+          fechaInicio = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'mes':
+          fechaInicio = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+          break;
+        case 'historico':
+          return registros; // Retorna todos los registros
+      }
+
+      return registros.filter(r => {
+        const [dia, mes, año] = r.fecha.split('/');
+        const fechaRegistro = new Date(año, mes - 1, dia);
+        return fechaRegistro >= fechaInicio && fechaRegistro <= ahora;
+      });
+    };
+
+    const actualizarGraficoDiasCategorias = () => {
+      // Registrar el plugin de datalabels
+      Chart.register(ChartDataLabels);
+
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosFiltrados = obtenerDatosPeriodoGrafico(registros, periodoGrafico);
+      
+      // Calcular días por categoría
+      const diasPorCategoria = {};
+      categorias.forEach(categoria => {
+        const diasUnicos = new Set();
+        registrosFiltrados.forEach(registro => {
+          const ejercicio = ejercicios.find(e => e.nombre === registro.ejercicio);
+          if (ejercicio && ejercicio.categoria === categoria) {
+            diasUnicos.add(registro.fecha);
+          }
+        });
+        diasPorCategoria[categoria] = diasUnicos.size;
+      });
+
+      const ctx = document.getElementById('graficoDiasCategorias').getContext('2d');
+      
+      if (graficoDiasCategorias) {
+        graficoDiasCategorias.destroy();
+      }
+
+      const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDarkMode ? '#ffffff' : '#333333';
+
+      // Colores para las categorías
+      const colores = [
+        '#4299e1', // Azul
+        '#48bb78', // Verde
+        '#ed8936', // Naranja
+        '#9f7aea', // Púrpura
+        '#f56565', // Rojo
+        '#38b2ac', // Turquesa
+        '#ecc94b', // Amarillo
+        '#a0aec0', // Gris
+        '#4fd1c5', // Verde azulado
+        '#f6ad55'  // Naranja claro
+      ];
+
+      graficoDiasCategorias = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: categorias,
+          datasets: [{
+            data: categorias.map(c => diasPorCategoria[c]),
+            backgroundColor: colores,
+            borderWidth: 2,
+            borderColor: isDarkMode ? '#2d3748' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: textColor,
+                padding: 20,
+                font: {
+                  size: 12
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const porcentaje = ((context.raw / total) * 100).toFixed(1);
+                  return `${context.label}: ${context.raw} días (${porcentaje}%)`;
+                }
+              }
+            },
+            datalabels: {
+              color: textColor,
+              font: {
+                weight: 'bold',
+                size: 12
+              },
+              formatter: function(value, context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const porcentaje = ((value / total) * 100).toFixed(1);
+                return value > 0 ? `${value}\n(${porcentaje}%)` : '';
+              },
+              textAlign: 'center',
+              textBaseline: 'middle'
+            }
+          },
+          cutout: '60%',
+          animation: {
+            animateScale: true,
+            animateRotate: true
+          }
+        }
+      });
+    };
+
+    const actualizarGraficoEvolucion = () => {
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
+      const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
+      
+      // Obtener últimos 30 días
+      const ahora = new Date();
+      const dias = Array.from({length: 30}, (_, i) => {
+        const fecha = new Date(ahora);
+        fecha.setDate(fecha.getDate() - i);
+        return fecha.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit'});
+      }).reverse();
+
+      // Preparar datos para el gráfico
+      const datasets = categorias.map((categoria, index) => {
+        const datos = dias.map(dia => {
+          const registrosDia = registros.filter(r => {
+            const ejercicio = ejercicios.find(e => e.nombre === r.ejercicio);
+            return r.fecha === dia && ejercicio && ejercicio.categoria === categoria;
+          });
+          return registrosDia.length > 0 ? 1 : 0;
+        });
+
+        return {
+          label: categoria,
+          data: datos,
+          borderColor: colores[index % colores.length],
+          backgroundColor: colores[index % colores.length],
+          fill: false,
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        };
+      });
+
+      const ctx = document.getElementById('graficoEvolucion').getContext('2d');
+      
+      if (window.graficoEvolucion) {
+        window.graficoEvolucion.destroy();
+      }
+
+      const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDarkMode ? '#ffffff' : '#333333';
+
+      window.graficoEvolucion = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dias,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: textColor,
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12
+                }
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  const categoria = context.dataset.label;
+                  const valor = context.raw;
+                  return valor === 1 ? `${categoria}: Entrenado` : `${categoria}: No entrenado`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: textColor,
+                maxRotation: 45,
+                minRotation: 45,
+                font: {
+                  size: 11
+                }
+              }
+            },
+            y: {
+              beginAtZero: true,
+              max: 1,
+              ticks: {
+                stepSize: 1,
+                color: textColor,
+                callback: function(value) {
+                  return value === 1 ? 'Sí' : 'No';
+                }
+              },
+              grid: {
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              }
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    };
+
+    const guardarObjetivo = () => {
+      const peso = document.getElementById('objetivo-peso').value;
+      const reps = document.getElementById('objetivo-reps').value;
+      
+      if (!peso || !reps) {
+        alert("Por favor, completa ambos campos del objetivo");
+        return;
+      }
+
+      const objetivo = {
+        ejercicio: ejercicioSeleccionado,
+        peso: parseFloat(peso),
+        reps: parseInt(reps)
+      };
+
+      localStorage.setItem(`objetivo_${ejercicioSeleccionado}`, JSON.stringify(objetivo));
+      actualizarProgresoObjetivo();
+    };
+
+    const actualizarProgresoObjetivo = () => {
+      const objetivo = JSON.parse(localStorage.getItem(`objetivo_${ejercicioSeleccionado}`) || "null");
+      const contenedor = document.getElementById('progreso-objetivo');
+      
+      if (!objetivo) {
+        contenedor.innerHTML = '<p>No hay objetivo establecido</p>';
+        return;
+      }
+
+      const registros = JSON.parse(localStorage.getItem('registros') || "[]");
+      const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
+      
+      if (registrosEjercicio.length === 0) {
+        contenedor.innerHTML = '<p>No hay registros para comparar</p>';
+        return;
+      }
+
+      const ultimoRegistro = registrosEjercicio[registrosEjercicio.length - 1];
+      const progresoPeso = (ultimoRegistro.peso / objetivo.peso * 100).toFixed(1);
+      const progresoReps = (ultimoRegistro.reps / objetivo.reps * 100).toFixed(1);
+
+      contenedor.innerHTML = `
+        <div class="progreso-item">
+          <div class="progreso-label">Peso: ${ultimoRegistro.peso}kg / ${objetivo.peso}kg</div>
+          <div class="progreso-bar">
+            <div class="progreso-fill" style="width: ${Math.min(progresoPeso, 100)}%"></div>
+          </div>
+          <div class="progreso-porcentaje">${progresoPeso}%</div>
+        </div>
+        <div class="progreso-item">
+          <div class="progreso-label">Repeticiones: ${ultimoRegistro.reps} / ${objetivo.reps}</div>
+          <div class="progreso-bar">
+            <div class="progreso-fill" style="width: ${Math.min(progresoReps, 100)}%"></div>
+          </div>
+          <div class="progreso-porcentaje">${progresoReps}%</div>
+        </div>
+      `;
+    };
+
     // Inicialización
     loadTheme();
+    cargarCategorias();
     actualizarBotonesEjercicios();
     mostrarUltimosRegistros();
+    filtrarEjerciciosPorCategoria('');
   </script>
 </body>
 </html>

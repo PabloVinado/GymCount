@@ -1224,6 +1224,21 @@
     let categoriaEnEdicion = '';
     let graficoDiasCategorias = null;
     let periodoGrafico = 'semana';
+    let graficoEvolucion = null;  // Añadimos variable global para el gráfico de evolución
+
+    // Definición global de colores para los gráficos
+    const colores = [
+      '#4299e1', // Azul
+      '#48bb78', // Verde
+      '#ed8936', // Naranja
+      '#9f7aea', // Púrpura
+      '#f56565', // Rojo
+      '#38b2ac', // Turquesa
+      '#ecc94b', // Amarillo
+      '#a0aec0', // Gris
+      '#4fd1c5', // Verde azulado
+      '#f6ad55'  // Naranja claro
+    ];
 
     const cambiarTipoEjercicio = (tipo) => {
       tipoEjercicioSeleccionado = tipo;
@@ -1320,7 +1335,7 @@
 
     const mostrarUltimosRegistros = () => {
       actualizarGraficoDiasCategorias();
-      actualizarEstadisticasAvanzadas();
+      calcularEstadisticasAvanzadas();
       actualizarGraficoEvolucion();
     };
 
@@ -1815,7 +1830,7 @@
       
       document.body.classList.add('loading');
       
-      setTimeout(() => {
+      try {
         const registros = JSON.parse(localStorage.getItem('registros') || "[]");
         registros.push(nuevo);
         localStorage.setItem('registros', JSON.stringify(registros));
@@ -1826,9 +1841,12 @@
         document.getElementById('peso').value = '';
         document.getElementById('reps').value = '';
         document.getElementById('fecha').value = '';
-        
+      } catch (error) {
+        console.error('Error al guardar el registro:', error);
+        alert('Hubo un error al guardar el registro');
+      } finally {
         document.body.classList.remove('loading');
-      }, 300);
+      }
     };
 
     const borrarRegistroIndividual = (fecha) => {
@@ -2054,20 +2072,6 @@
       const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
       const textColor = isDarkMode ? '#ffffff' : '#333333';
 
-      // Colores para las categorías
-      const colores = [
-        '#4299e1', // Azul
-        '#48bb78', // Verde
-        '#ed8936', // Naranja
-        '#9f7aea', // Púrpura
-        '#f56565', // Rojo
-        '#38b2ac', // Turquesa
-        '#ecc94b', // Amarillo
-        '#a0aec0', // Gris
-        '#4fd1c5', // Verde azulado
-        '#f6ad55'  // Naranja claro
-      ];
-
       graficoDiasCategorias = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -2163,14 +2167,14 @@
 
       const ctx = document.getElementById('graficoEvolucion').getContext('2d');
       
-      if (window.graficoEvolucion) {
-        window.graficoEvolucion.destroy();
+      if (graficoEvolucion) {
+        graficoEvolucion.destroy();
       }
 
       const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
       const textColor = isDarkMode ? '#ffffff' : '#333333';
 
-      window.graficoEvolucion = new Chart(ctx, {
+      graficoEvolucion = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dias,

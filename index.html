@@ -523,30 +523,38 @@
 
     .stats-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 1em;
       margin: 1.5em 0;
     }
 
     .stat-card {
       background: var(--card-bg);
-      padding: 1em;
-      border-radius: 8px;
+      padding: 1.5em;
+      border-radius: 12px;
       text-align: center;
       box-shadow: 0 2px 4px var(--shadow-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .stat-label {
+      font-size: 1.1em;
+      color: var(--text-color);
+      opacity: 0.8;
+      margin-bottom: 0.5em;
     }
 
     .stat-value {
-      font-size: 1.5em;
+      font-size: 2em;
       font-weight: 600;
       color: var(--primary-color);
       margin: 0.2em 0;
     }
 
-    .stat-label {
-      font-size: 1em;
+    .stat-subvalue {
+      font-size: 1.2em;
       color: var(--text-color);
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     .badge {
@@ -862,11 +870,11 @@
     }
 
     .stats-avanzadas {
-      margin-top: 2em;
-      padding: 1.5em;
+      margin: 1.5em 0;
+      padding: 1em;
       background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: 0 4px 6px var(--shadow-color);
+      border-radius: 12px;
+      box-shadow: 0 2px 4px var(--shadow-color);
       border: 1px solid var(--border-color);
     }
 
@@ -1021,6 +1029,50 @@
       background: var(--primary-color);
       color: white;
     }
+
+    .stats-tabla {
+      margin-top: 1em;
+      overflow-x: auto;
+    }
+
+    .stats-tabla table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    .stats-tabla th,
+    .stats-tabla td {
+      padding: 0.75em;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .stats-tabla th {
+      font-weight: 600;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    .stats-tabla td:last-child {
+      color: var(--text-color);
+      opacity: 0.7;
+    }
+
+    .stats-tabla tr:last-child td {
+      border-bottom: none;
+    }
+
+    @media (max-width: 480px) {
+      .stats-tabla {
+        font-size: 0.85em;
+      }
+      
+      .stats-tabla th,
+      .stats-tabla td {
+        padding: 0.5em;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1088,59 +1140,14 @@
       <div class="stat-card tooltip">
         <div class="stat-label">Peso Máximo</div>
         <div class="stat-value" id="peso-maximo">-</div>
-        <span class="tooltiptext">El peso más alto registrado</span>
+        <div class="stat-subvalue" id="reps-peso-maximo">-</div>
+        <span class="tooltiptext">El peso más alto registrado con sus repeticiones</span>
       </div>
       <div class="stat-card tooltip">
-        <div class="stat-label" id="valor-maximo-label">Reps Máximas</div>
-        <div class="stat-value" id="valor-maximo">-</div>
-        <span class="tooltiptext" id="valor-maximo-tooltip">Las repeticiones más altas registradas</span>
-      </div>
-      <div class="stat-card tooltip">
-        <div class="stat-label">Total Series</div>
-        <div class="stat-value" id="total-series">-</div>
-        <span class="tooltiptext">Número total de series registradas</span>
-      </div>
-    </div>
-
-    <div class="stats-avanzadas">
-      <h3>Estadísticas Avanzadas</h3>
-      <div class="stats-grid">
-        <div class="stat-card-avanzada">
-          <div class="stat-header">
-            <h4>Volumen Total</h4>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="volumen-total">-</div>
-            <div class="stat-label">kg × reps</div>
-          </div>
-        </div>
-        <div class="stat-card-avanzada">
-          <div class="stat-header">
-            <h4>1RM Estimado</h4>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="rm-estimado">-</div>
-            <div class="stat-label">kg</div>
-          </div>
-        </div>
-        <div class="stat-card-avanzada">
-          <div class="stat-header">
-            <h4>Progresión Semanal</h4>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="progresion-mensual">-</div>
-            <div class="stat-label">kg/semana</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="exportar-container">
-      <h3>Exportar Datos</h3>
-      <div class="exportar-opciones">
-        <button onclick="exportarDatos('json')">Exportar JSON</button>
-        <button onclick="exportarDatos('csv')">Exportar CSV</button>
-        <button onclick="exportarDatos('pdf')">Exportar PDF</button>
+        <div class="stat-label">Próximo Objetivo</div>
+        <div class="stat-value" id="objetivo-peso">-</div>
+        <div class="stat-subvalue" id="objetivo-reps">-</div>
+        <span class="tooltiptext">Peso y repeticiones objetivo para la próxima sesión</span>
       </div>
     </div>
 
@@ -1168,6 +1175,78 @@
       <div class="grafico-container" id="contenedor-grafico-peso">
         <h3 class="grafico-titulo">Progreso de Peso</h3>
         <canvas id="graficoPeso"></canvas>
+      </div>
+    </div>
+
+    <div class="stats-avanzadas">
+      <h3>Estadísticas</h3>
+      <div class="stats-tabla">
+        <table>
+          <tr>
+            <th>Métrica</th>
+            <th>Valor</th>
+            <th>Unidad</th>
+          </tr>
+          <tr>
+            <td>Volumen Total</td>
+            <td id="volumen-total">-</td>
+            <td>kg × reps</td>
+          </tr>
+          <tr>
+            <td>Repeticiones Totales</td>
+            <td id="reps-totales">-</td>
+            <td>reps</td>
+          </tr>
+          <tr>
+            <td>Series Totales</td>
+            <td id="series-totales">-</td>
+            <td>series</td>
+          </tr>
+          <tr>
+            <td>Peso Promedio</td>
+            <td id="peso-promedio">-</td>
+            <td>kg</td>
+          </tr>
+          <tr>
+            <td>Reps Promedio</td>
+            <td id="reps-promedio">-</td>
+            <td>reps</td>
+          </tr>
+          <tr>
+            <td>1RM Estimado</td>
+            <td id="rm-estimado">-</td>
+            <td>kg</td>
+          </tr>
+          <tr>
+            <td>Progresión Semanal</td>
+            <td id="progresion-mensual">-</td>
+            <td>kg/semana</td>
+          </tr>
+          <tr>
+            <td>Mejor Serie</td>
+            <td id="mejor-serie">-</td>
+            <td>kg × reps</td>
+          </tr>
+          <tr>
+            <td>Días Entrenados</td>
+            <td id="dias-entrenados">-</td>
+            <td>días</td>
+          </tr>
+          <tr>
+            <td>Frecuencia Semanal</td>
+            <td id="frecuencia-semanal">-</td>
+            <td>días/semana</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="exportar-container">
+      <h3>Exportar Datos</h3>
+      <div class="exportar-opciones">
+        <button onclick="exportarDatos('json')">Exportar JSON</button>
+        <button onclick="exportarDatos('csv')">Exportar CSV</button>
+        <button onclick="exportarDatos('pdf')">Exportar PDF</button>
       </div>
     </div>
 
@@ -1348,35 +1427,42 @@
     };
 
     const seleccionarEjercicio = (nombre) => {
+      console.log('Seleccionando ejercicio:', nombre);
       const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
       const ejercicio = ejercicios.find(e => e.nombre === nombre);
       
       if (ejercicio) {
+        console.log('Ejercicio encontrado:', ejercicio);
         ejercicioSeleccionado = ejercicio.nombre;
         tipoEjercicioSeleccionado = ejercicio.tipo;
-        categoriaSeleccionada = ejercicio.categoria || 'otro';
-        document.getElementById('ejercicio-actual').textContent = ejercicio.nombre;
+        categoriaSeleccionada = ejercicio.categoria || '';
+        
+        // Cambiar a la pantalla de registro primero
+        document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+        document.getElementById('pantalla-registro').classList.add('activa');
+        
+        // Luego actualizar la interfaz
+        const ejercicioActual = document.getElementById('ejercicio-actual');
+        if (ejercicioActual) {
+          ejercicioActual.textContent = ejercicio.nombre;
+        }
         
         actualizarInterfazPorTipo(ejercicio.tipo);
-        
+        actualizarEstadisticas();
         mostrarHistorial();
-        mostrarPantalla('pantalla-registro');
+      } else {
+        console.log('Ejercicio no encontrado');
       }
     };
 
     const actualizarInterfazPorTipo = (tipo) => {
       const repsInput = document.getElementById('reps');
-      const valorMaximoLabel = document.getElementById('valor-maximo-label');
-      const valorMaximoTooltip = document.getElementById('valor-maximo-tooltip');
-      
+      if (!repsInput) return;
+
       if (tipo === 'tiempo') {
         repsInput.placeholder = 'Tiempo (segundos)';
-        valorMaximoLabel.textContent = 'Tiempo Máximo';
-        valorMaximoTooltip.textContent = 'El tiempo más largo registrado';
       } else {
         repsInput.placeholder = 'Repeticiones';
-        valorMaximoLabel.textContent = 'Reps Máximas';
-        valorMaximoTooltip.textContent = 'Las repeticiones más altas registradas';
       }
       
       repsInput.step = '1';
@@ -1660,29 +1746,76 @@
       const registros = JSON.parse(localStorage.getItem('registros') || "[]");
       const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
 
-      const pesoMaximo = registrosEjercicio
-        .reduce((max, r) => Math.max(max, parseFloat(r.peso) || 0), 0);
-      
-      const valorMaximo = registrosEjercicio
-        .reduce((max, r) => Math.max(max, r.tipo === 'tiempo' ? r.tiempo : r.reps || 0), 0);
-      
-      const totalSeries = registrosEjercicio.length;
+      // Encontrar el registro con el peso máximo
+      const registroPesoMaximo = registrosEjercicio.reduce((max, r) => {
+        const pesoActual = parseFloat(r.peso);
+        const pesoMax = parseFloat(max.peso);
+        if (pesoActual > pesoMax) {
+          return r;
+        } else if (pesoActual === pesoMax && parseInt(r.reps) > parseInt(max.reps)) {
+          return r;
+        }
+        return max;
+      }, { peso: 0, reps: 0 });
 
-      document.getElementById('peso-maximo').textContent = pesoMaximo > 0 ? `${pesoMaximo}kg` : '-';
-      document.getElementById('valor-maximo').textContent = valorMaximo > 0 ? 
-        `${valorMaximo}${tipoEjercicioSeleccionado === 'tiempo' ? ' seg' : ''}` : '-';
-      document.getElementById('total-series').textContent = totalSeries;
+      // Calcular el próximo objetivo
+      let objetivoPeso = registroPesoMaximo.peso;
+      let objetivoReps = registroPesoMaximo.reps;
+
+      if (objetivoReps >= 10) {
+        objetivoPeso = parseFloat(objetivoPeso) + 2.5;
+        objetivoReps = 4;
+      } else {
+        objetivoReps = parseInt(objetivoReps) + 2;
+      }
+
+      document.getElementById('peso-maximo').textContent = registroPesoMaximo.peso > 0 ? `${registroPesoMaximo.peso}kg` : '-';
+      document.getElementById('reps-peso-maximo').textContent = registroPesoMaximo.peso > 0 ? `${registroPesoMaximo.reps} reps` : '-';
+      
+      document.getElementById('objetivo-peso').textContent = objetivoPeso > 0 ? `${objetivoPeso}kg` : '-';
+      document.getElementById('objetivo-reps').textContent = objetivoReps > 0 ? `${objetivoReps} reps` : '-';
     };
 
     const calcularEstadisticasAvanzadas = () => {
       const registros = JSON.parse(localStorage.getItem('registros') || "[]");
       const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicioSeleccionado);
 
+      if (registrosEjercicio.length === 0) {
+        document.getElementById('volumen-total').textContent = '-';
+        document.getElementById('reps-totales').textContent = '-';
+        document.getElementById('series-totales').textContent = '-';
+        document.getElementById('peso-promedio').textContent = '-';
+        document.getElementById('reps-promedio').textContent = '-';
+        document.getElementById('rm-estimado').textContent = '-';
+        document.getElementById('progresion-mensual').textContent = '-';
+        document.getElementById('mejor-serie').textContent = '-';
+        document.getElementById('dias-entrenados').textContent = '-';
+        document.getElementById('frecuencia-semanal').textContent = '-';
+        return;
+      }
+
       // Calcular volumen total
       const volumenTotal = registrosEjercicio.reduce((total, r) => {
         return total + (parseFloat(r.peso) * parseInt(r.reps));
       }, 0);
       document.getElementById('volumen-total').textContent = volumenTotal.toLocaleString();
+
+      // Calcular repeticiones totales
+      const repsTotales = registrosEjercicio.reduce((total, r) => {
+        return total + parseInt(r.reps);
+      }, 0);
+      document.getElementById('reps-totales').textContent = repsTotales.toLocaleString();
+
+      // Series totales
+      document.getElementById('series-totales').textContent = registrosEjercicio.length.toLocaleString();
+
+      // Peso promedio
+      const pesoPromedio = registrosEjercicio.reduce((sum, r) => sum + parseFloat(r.peso), 0) / registrosEjercicio.length;
+      document.getElementById('peso-promedio').textContent = pesoPromedio.toFixed(1);
+
+      // Reps promedio
+      const repsPromedio = repsTotales / registrosEjercicio.length;
+      document.getElementById('reps-promedio').textContent = repsPromedio.toFixed(1);
 
       // Calcular 1RM estimado (fórmula de Brzycki)
       const calcular1RM = (peso, reps) => {
@@ -1694,6 +1827,24 @@
         return Math.max(max, rm);
       }, 0);
       document.getElementById('rm-estimado').textContent = rmEstimado.toFixed(1);
+
+      // Mejor serie (mayor volumen en una sola serie)
+      const mejorSerie = registrosEjercicio.reduce((max, r) => {
+        const volumen = parseFloat(r.peso) * parseInt(r.reps);
+        return Math.max(max, volumen);
+      }, 0);
+      document.getElementById('mejor-serie').textContent = mejorSerie.toLocaleString();
+
+      // Días entrenados (días únicos)
+      const diasUnicos = new Set(registrosEjercicio.map(r => r.fecha));
+      document.getElementById('dias-entrenados').textContent = diasUnicos.size;
+
+      // Frecuencia semanal promedio
+      const primerRegistro = new Date(registrosEjercicio[0].fecha.split('/').reverse().join('-'));
+      const ultimoRegistro = new Date(registrosEjercicio[registrosEjercicio.length - 1].fecha.split('/').reverse().join('-'));
+      const semanasTotales = Math.max(1, (ultimoRegistro - primerRegistro) / (7 * 24 * 60 * 60 * 1000));
+      const frecuenciaSemanal = diasUnicos.size / semanasTotales;
+      document.getElementById('frecuencia-semanal').textContent = frecuenciaSemanal.toFixed(1);
 
       // Calcular progresión semanal
       const ahora = new Date();
@@ -2150,15 +2301,21 @@
             const ejercicio = ejercicios.find(e => e.nombre === r.ejercicio);
             return r.fecha === dia && ejercicio && ejercicio.categoria === categoria;
           });
-          return registrosDia.length > 0 ? 1 : 0;
+
+          // Calcular volumen total (peso × reps) para el día
+          const volumenTotal = registrosDia.reduce((total, registro) => {
+            return total + (parseFloat(registro.peso) * parseInt(registro.reps));
+          }, 0);
+
+          return volumenTotal;
         });
 
         return {
           label: categoria,
           data: datos,
           borderColor: colores[index % colores.length],
-          backgroundColor: colores[index % colores.length],
-          fill: false,
+          backgroundColor: colores[index % colores.length] + '40', // Agregar transparencia
+          fill: true,
           tension: 0.4,
           pointRadius: 4,
           pointHoverRadius: 6
@@ -2201,8 +2358,8 @@
               callbacks: {
                 label: function(context) {
                   const categoria = context.dataset.label;
-                  const valor = context.raw;
-                  return valor === 1 ? `${categoria}: Entrenado` : `${categoria}: No entrenado`;
+                  const volumen = context.raw;
+                  return `${categoria}: ${volumen.toLocaleString()} kg × reps`;
                 }
               }
             }
@@ -2223,16 +2380,19 @@
             },
             y: {
               beginAtZero: true,
-              max: 1,
               ticks: {
-                stepSize: 1,
                 color: textColor,
                 callback: function(value) {
-                  return value === 1 ? 'Sí' : 'No';
+                  return value.toLocaleString() + ' kg × reps';
                 }
               },
               grid: {
                 color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              },
+              title: {
+                display: true,
+                text: 'Volumen Total (kg × reps)',
+                color: textColor
               }
             }
           },

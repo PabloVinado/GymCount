@@ -47,12 +47,20 @@
     body {
       font-family: 'Inter', sans-serif;
       padding: 1.5em;
+      padding-top: 4em;
       max-width: 800px;
       margin: auto;
       background-color: var(--bg-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
       line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 1em;
+        padding-top: 3.5em;
+      }
     }
 
     h2, h3 {

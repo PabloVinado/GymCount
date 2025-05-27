@@ -1081,55 +1081,200 @@
         padding: 0.5em;
       }
     }
+
+    /* Estilos para la guía de pasos */
+    .seccion-guia {
+      background: var(--card-bg);
+      padding: 1.5em;
+      margin: 1em 0;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px var(--shadow-color);
+      display: none; /* Oculto por defecto */
+    }
+
+    .seccion-guia.visible {
+      display: block;
+    }
+
+    .boton-guia {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 0.5em 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-bottom: 1em;
+      transition: all 0.2s;
+    }
+
+    .boton-guia:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .boton-guia .icono {
+      font-size: 1.2em;
+    }
+
+    .paso-guia {
+      display: flex;
+      align-items: flex-start;
+      gap: 1em;
+      margin-bottom: 1em;
+      padding: 1em;
+      background: var(--bg-color);
+      border-radius: 8px;
+    }
+
+    .numero-paso {
+      background: var(--primary-color);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .contenido-paso {
+      flex-grow: 1;
+    }
+
+    /* Estilos existentes */
+    
+    .bloque-seccion {
+      background: var(--card-bg);
+      padding: 1.5em;
+      margin: 1.5em 0;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .bloque-seccion h3 {
+      margin-bottom: 1em;
+      color: var(--text-color);
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+
+    .bloque-seccion h3::after {
+      display: none;
+    }
+
+    .bloque-seccion .icono {
+      font-size: 1.2em;
+    }
+
+    .ejercicio-container {
+      margin-bottom: 0;
+    }
+
+    .ejercicios-guardados {
+      margin-top: 0;
+    }
+
+    .categorias-container {
+      margin: 0;
+    }
   </style>
 </head>
 <body>
   <div id="pantalla-seleccion" class="pantalla activa">
-    <h2>Selección de Ejercicio</h2>
+    <h2>GymCount</h2>
     
-    <div class="ejercicio-container">
-      <input type="text" id="ejercicio" placeholder="Nuevo ejercicio" />
-      <div class="tipo-ejercicio-selector">
-        <button class="tipo-btn activo" data-tipo="repeticiones" onclick="cambiarTipoEjercicio('repeticiones')">
-          <span class="icono">🔄</span>
-          Repeticiones
-        </button>
-        <button class="tipo-btn" data-tipo="tiempo" onclick="cambiarTipoEjercicio('tiempo')">
-          <span class="icono">⏱️</span>
-          Tiempo
-        </button>
-      </div>
-      <div class="nueva-categoria-container">
-        <input type="text" id="nueva-categoria" placeholder="Nueva categoría" />
-        <button onclick="agregarCategoria()">Agregar</button>
-      </div>
-      <div class="categorias-container" id="categorias-container">
-        <!-- Las categorías se cargarán dinámicamente -->
-      </div>
-      <button onclick="continuarARegistro()">Continuar</button>
+    <button class="boton-guia" onclick="toggleGuia()">
+        <span class="icono">❓</span>
+        ¿Cómo empezar?
+    </button>
+
+    <div class="seccion-guia" id="seccion-guia">
+        <h3>Guía de uso</h3>
+        <div class="paso-guia">
+            <div class="numero-paso">1</div>
+            <div class="contenido-paso">
+                <strong>Escribe el nombre del ejercicio</strong>
+                <p>Ingresa el nombre del ejercicio que quieres registrar. Por ejemplo: "Sentadillas", "Press de banca", etc.</p>
+            </div>
+        </div>
+        <div class="paso-guia">
+            <div class="numero-paso">2</div>
+            <div class="contenido-paso">
+                <strong>Selecciona el tipo de ejercicio</strong>
+                <p>Elige si quieres contar repeticiones o medir tiempo.</p>
+            </div>
+        </div>
+        <div class="paso-guia">
+            <div class="numero-paso">3</div>
+            <div class="contenido-paso">
+                <strong>Organiza por categorías</strong>
+                <p>Crea categorías para organizar tus ejercicios (opcional).</p>
+            </div>
+        </div>
     </div>
 
-    <div class="ejercicios-guardados">
-      <!-- Ejercicios guardados se cargarán dinámicamente -->
+    <div class="bloque-seccion">
+        <h3><span class="icono">➕</span> Nuevo Ejercicio</h3>
+        <div class="ejercicio-container">
+            <input type="text" id="ejercicio" placeholder="Nuevo ejercicio" />
+            <div class="tipo-ejercicio-selector">
+                <button class="tipo-btn activo" data-tipo="repeticiones" onclick="cambiarTipoEjercicio('repeticiones')">
+                    <span class="icono">🔄</span>
+                    Repeticiones
+                </button>
+                <button class="tipo-btn" data-tipo="tiempo" onclick="cambiarTipoEjercicio('tiempo')">
+                    <span class="icono">⏱️</span>
+                    Tiempo
+                </button>
+            </div>
+            <button onclick="continuarARegistro()">Continuar</button>
+        </div>
+    </div>
+
+    <div class="bloque-seccion">
+        <h3><span class="icono">🏷️</span> Categorías</h3>
+        <div class="nueva-categoria-container">
+            <input type="text" id="nueva-categoria" placeholder="Nueva categoría" />
+            <button onclick="agregarCategoria()">Agregar</button>
+        </div>
+        <div class="categorias-container" id="categorias-container">
+            <!-- Las categorías se cargarán dinámicamente -->
+        </div>
+    </div>
+
+    <div class="bloque-seccion">
+        <h3><span class="icono">📋</span> Ejercicios Registrados</h3>
+        <div class="ejercicios-guardados">
+            <!-- Ejercicios guardados se cargarán dinámicamente -->
+        </div>
     </div>
 
     <div class="grafico-dias-categorias">
-      <h3>Días Entrenados por Categoría</h3>
-      <div class="selector-periodo-grafico">
-        <button class="periodo-grafico-btn activo" onclick="cambiarPeriodoGrafico('semana')">Última semana</button>
-        <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('mes')">Último mes</button>
-        <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('historico')">Histórico</button>
-      </div>
-      <div class="grafico-dias-container">
-        <canvas id="graficoDiasCategorias"></canvas>
-      </div>
+        <h3>Días Entrenados por Categoría</h3>
+        <div class="selector-periodo-grafico">
+            <button class="periodo-grafico-btn activo" onclick="cambiarPeriodoGrafico('semana')">Última semana</button>
+            <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('mes')">Último mes</button>
+            <button class="periodo-grafico-btn" onclick="cambiarPeriodoGrafico('historico')">Histórico</button>
+        </div>
+        <div class="grafico-dias-container">
+            <canvas id="graficoDiasCategorias"></canvas>
+        </div>
     </div>
 
     <div class="grafico-evolucion">
-      <h3>Evolución Temporal</h3>
-      <div class="grafico-evolucion-container">
-        <canvas id="graficoEvolucion"></canvas>
-      </div>
+        <h3>Evolución Temporal</h3>
+        <div class="grafico-evolucion-container">
+            <canvas id="graficoEvolucion"></canvas>
+        </div>
     </div>
   </div>
 
@@ -2291,44 +2436,26 @@
 
     const actualizarGraficoEvolucion = () => {
       const registros = JSON.parse(localStorage.getItem('registros') || "[]");
-      const categorias = JSON.parse(localStorage.getItem('categorias') || "[]");
       const ejercicios = JSON.parse(localStorage.getItem('ejerciciosGuardados') || "[]");
       
-      // Obtener últimos 30 días
-      const ahora = new Date();
-      const dias = Array.from({length: 30}, (_, i) => {
-        const fecha = new Date(ahora);
-        fecha.setDate(fecha.getDate() - i);
-        return fecha.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit'});
-      }).reverse();
-
       // Preparar datos para el gráfico
-      const datasets = categorias.map((categoria, index) => {
-        const datos = dias.map(dia => {
-          const registrosDia = registros.filter(r => {
-            const ejercicio = ejercicios.find(e => e.nombre === r.ejercicio);
-            return r.fecha === dia && ejercicio && ejercicio.categoria === categoria;
-          });
+      const datosEjercicios = ejercicios.map(ejercicio => {
+        // Obtener registros de este ejercicio
+        const registrosEjercicio = registros.filter(r => r.ejercicio === ejercicio.nombre);
+        
+        // Si no hay registros, no incluir el ejercicio
+        if (registrosEjercicio.length === 0) return null;
 
-          // Calcular volumen total (peso × reps) para el día
-          const volumenTotal = registrosDia.reduce((total, registro) => {
-            return total + (parseFloat(registro.peso) * parseInt(registro.reps));
-          }, 0);
-
-          return volumenTotal;
-        });
-
+        // Calcular peso máximo
+        const pesoMaximo = Math.max(...registrosEjercicio.map(r => parseFloat(r.peso) || 0));
+        
         return {
-          label: categoria,
-          data: datos,
-          borderColor: colores[index % colores.length],
-          backgroundColor: colores[index % colores.length] + '40', // Agregar transparencia
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointHoverRadius: 6
+          ejercicio: ejercicio.nombre,
+          peso: pesoMaximo,
+          categoria: ejercicio.categoria || 'Sin categoría'
         };
-      });
+      }).filter(dato => dato !== null)
+        .sort((a, b) => b.peso - a.peso); // Ordenar por peso máximo descendente
 
       const ctx = document.getElementById('graficoEvolucion').getContext('2d');
       
@@ -2339,75 +2466,78 @@
       const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
       const textColor = isDarkMode ? '#ffffff' : '#333333';
 
+      // Si no hay datos, mostrar mensaje
+      if (datosEjercicios.length === 0) {
+        const contenedor = document.querySelector('.grafico-evolucion-container');
+        contenedor.innerHTML = '<div style="text-align: center; padding: 2em;">No hay datos para mostrar</div>';
+        return;
+      }
+
+      // Crear el gráfico
       graficoEvolucion = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
-          labels: dias,
-          datasets: datasets
+          labels: datosEjercicios.map(d => d.ejercicio),
+          datasets: [{
+            label: 'Peso Máximo (kg)',
+            data: datosEjercicios.map(d => d.peso),
+            backgroundColor: datosEjercicios.map(d => {
+              const categoria = d.categoria;
+              const index = ejercicios.findIndex(e => e.categoria === categoria);
+              return colores[index % colores.length] + '80';
+            }),
+            borderColor: datosEjercicios.map(d => {
+              const categoria = d.categoria;
+              const index = ejercicios.findIndex(e => e.categoria === categoria);
+              return colores[index % colores.length];
+            }),
+            borderWidth: 2
+          }]
         },
         options: {
+          indexAxis: 'y', // Hacer el gráfico horizontal
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'top',
-              labels: {
-                color: textColor,
-                usePointStyle: true,
-                padding: 20,
-                font: {
-                  size: 12
-                }
-              }
+              display: false
             },
             tooltip: {
-              mode: 'index',
-              intersect: false,
               callbacks: {
                 label: function(context) {
-                  const categoria = context.dataset.label;
-                  const volumen = context.raw;
-                  return `${categoria}: ${volumen.toLocaleString()} kg × reps`;
+                  const ejercicio = datosEjercicios[context.dataIndex];
+                  return [
+                    `Peso máximo: ${context.raw} kg`,
+                    `Categoría: ${ejercicio.categoria}`
+                  ];
                 }
               }
             }
           },
           scales: {
             x: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                color: textColor,
-                maxRotation: 45,
-                minRotation: 45,
-                font: {
-                  size: 11
-                }
-              }
-            },
-            y: {
               beginAtZero: true,
               ticks: {
                 color: textColor,
                 callback: function(value) {
-                  return value.toLocaleString() + ' kg × reps';
+                  return value + ' kg';
                 }
               },
               grid: {
                 color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            y: {
+              ticks: {
+                color: textColor,
+                font: {
+                  size: 12
+                }
               },
-              title: {
-                display: true,
-                text: 'Volumen Total (kg × reps)',
-                color: textColor
+              grid: {
+                display: false
               }
             }
-          },
-          interaction: {
-            mode: 'nearest',
-            axis: 'x',
-            intersect: false
           }
         }
       });
@@ -2477,6 +2607,11 @@
     actualizarBotonesEjercicios();
     mostrarUltimosRegistros();
     filtrarEjerciciosPorCategoria('');
+
+    function toggleGuia() {
+        const seccionGuia = document.getElementById('seccion-guia');
+        seccionGuia.classList.toggle('visible');
+    }
   </script>
 </body>
 </html>

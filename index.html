@@ -58,8 +58,8 @@
 
     @media (max-width: 480px) {
       body {
-        padding: 0.75em;
-        padding-top: 3em;
+        padding: 0.5em;
+        padding-top: 2.5em;
       }
     }
 
@@ -586,8 +586,8 @@
 
     @media (max-width: 480px) {
       body {
-        padding: 0.75em;
-        padding-top: 3em;
+        padding: 0.5em;
+        padding-top: 2.5em;
       }
 
       .ejercicios-guardados {
@@ -605,193 +605,98 @@
         gap: 0.5em;
       }
 
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .stat-card-avanzada {
-        padding: 1em;
-      }
-
       .header-ejercicio {
         padding: 0.75em;
         margin-bottom: 1em;
-      }
-
-      .ejercicio-titulo {
-        font-size: 1.2em;
-      }
-
-      .grafico-container {
-        padding: 1em;
-        margin: 1em 0;
-      }
-
-      .grafico-titulo {
-        font-size: 1em;
-      }
-
-      .stats-avanzadas {
-        padding: 0.75em;
-        margin: 1em 0;
-      }
-
-      .stats-tabla {
-        font-size: 0.85em;
-      }
-
-      .stats-tabla th,
-      .stats-tabla td {
-        padding: 0.5em;
-      }
-
-      .exportar-container {
-        padding: 1em;
-        margin: 1em 0;
-      }
-
-      .exportar-opciones {
-        grid-template-columns: 1fr;
+        flex-wrap: wrap;
         gap: 0.5em;
       }
 
-      .vista-selector {
-        margin: 1em 0;
-      }
-
-      .vista-btn {
-        padding: 0.5em;
-        font-size: 0.85em;
-      }
-
-      .tipo-ejercicio-selector {
-        margin: 0.75em 0;
-      }
-
-      .tipo-btn {
-        padding: 0.5em;
-        font-size: 0.85em;
-      }
-
-      .fecha-container {
-        margin: 1em 0;
-        padding: 0.75em;
-      }
-
-      .fecha-container label {
-        font-size: 0.9em;
-      }
-
-      .stat-card {
-        padding: 1em;
-      }
-
-      .stat-value {
-        font-size: 1.5em;
-      }
-
-      .stat-subvalue {
-        font-size: 1em;
-      }
-
-      .modal-contenido {
-        width: 95%;
-        padding: 1em;
-      }
-
-      .modal-categorias {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .modal-categoria-btn {
-        padding: 0.4em;
-        font-size: 0.85em;
-      }
-
-      .grafico-dias-categorias,
-      .grafico-evolucion {
-        padding: 1em;
-        margin: 1em 0;
-      }
-
-      .grafico-dias-container,
-      .grafico-evolucion-container {
-        height: 250px;
-      }
-
-      .selector-periodo-grafico {
-        flex-wrap: wrap;
-      }
-
-      .periodo-grafico-btn {
-        flex: 1 1 calc(33.333% - 0.5em);
-        font-size: 0.8em;
-        padding: 0.4em;
-      }
-
-      .bloque-seccion {
-        padding: 1em;
-        margin: 1em 0;
-      }
-
-      .bloque-seccion h3 {
+      .ejercicio-titulo {
         font-size: 1.1em;
+        width: 100%;
       }
 
-      .ejercicio-container {
-        padding: 1em;
-      }
-
-      input, select, button {
-        padding: 0.6em;
-        font-size: 0.95em;
-      }
-
-      .volver {
-        padding: 0.4em 0.75em;
-        font-size: 0.9em;
+      .header-ejercicio > div {
+        display: flex;
+        gap: 0.5em;
       }
 
       .editar-ejercicio,
       .borrar-ejercicio,
       .borrar-historial {
-        font-size: 1.2em;
+        font-size: 1.1em;
+        padding: 0.3em;
       }
 
-      .registro {
+      .vista-selector,
+      .tipo-ejercicio-selector {
+        flex-wrap: wrap;
+        gap: 0.3em;
+      }
+
+      .vista-btn,
+      .tipo-btn {
+        flex: 1 1 100%;
+        font-size: 0.8em;
+        padding: 0.4em;
+      }
+
+      .modal-contenido {
+        width: 95%;
         padding: 0.75em;
-      }
-
-      .registro-contenido {
-        font-size: 0.9em;
-      }
-
-      .borrar-registro {
-        font-size: 1.1em;
-      }
-    }
-
-    /* Ajustes adicionales para pantallas muy pequeñas */
-    @media (max-width: 360px) {
-      body {
-        padding: 0.5em;
-        padding-top: 2.5em;
-      }
-
-      .ejercicio-titulo {
-        font-size: 1.1em;
-      }
-
-      .stat-value {
-        font-size: 1.3em;
+        margin: 0.5em;
       }
 
       .modal-categorias {
         grid-template-columns: 1fr;
+        gap: 0.4em;
+      }
+
+      .modal-categoria-btn {
+        padding: 0.4em;
+        font-size: 0.8em;
+      }
+
+      .acciones-container {
+        flex-direction: column;
+        gap: 0.5em;
+      }
+
+      .acciones-container button {
+        width: 100%;
+      }
+
+      .grafico-dias-container,
+      .grafico-evolucion-container {
+        height: 200px;
+      }
+
+      .selector-periodo-grafico {
+        flex-wrap: wrap;
+        gap: 0.3em;
       }
 
       .periodo-grafico-btn {
         flex: 1 1 100%;
+        font-size: 0.75em;
+        padding: 0.3em;
+      }
+    }
+
+    @media (max-width: 360px) {
+      body {
+        padding: 0.4em;
+        padding-top: 2em;
+      }
+
+      .ejercicio-titulo {
+        font-size: 1em;
+      }
+
+      .grafico-dias-container,
+      .grafico-evolucion-container {
+        height: 180px;
       }
     }
 
